@@ -16,6 +16,7 @@ jobs:
         shell: bash
         run: |
           branch_name="${GITHUB_REF#refs/heads/}"
+          echo "branch=$branch_name" | tee -a $GITHUB_OUTPUT
           echo "branch: $branch_name"
         id: extract_branch
 
