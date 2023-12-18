@@ -12,11 +12,10 @@ jobs:
       name: CurrentBranch
 
     steps:
-      - name: Set Current Branch
-        id: set_current_branch
-        run: |
-          echo "CurrentBranch=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-          echo "branch: $CurrentBranch"
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
 
   # use_current_branch:
   #   needs: set_current_branch
