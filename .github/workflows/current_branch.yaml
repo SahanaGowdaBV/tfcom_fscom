@@ -2,8 +2,7 @@ name: Print Current Branch
 
 on:
   push:
-    branches:
-      - '*'
+  workflow_dispatch:
 
 jobs:
   set_current_branch:
@@ -15,18 +14,18 @@ jobs:
     steps:
       - name: Set Current Branch
         id: set_current_branch
-        run: echo "CurrentBranch=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: Display Current Branch
-        run: echo "Current Branch: ${{ steps.set_current_branch.outputs.CurrentBranch }}" >> $GITHUB_OUTPUT
-
-  use_current_branch:
-    needs: set_current_branch
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Get Current Branch
         run: |
-          current_branch=${{ needs.set_current_branch.outputs.CurrentBranch }}
-          echo "Current Branch: $current_branch" >> $GITHUB_OUTPUT 
-          # Use the current branch as needed in your workflow
+          echo "CurrentBranch=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          echo "branch: $CurrentBranch"
+
+  # use_current_branch:
+  #   needs: set_current_branch
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Get Current Branch
+  #       run: |
+  #         current_branch=${{ needs.set_current_branch.outputs.CurrentBranch }}
+  #         echo "Current Branch: $current_branch" >> $GITHUB_OUTPUT 
+  #         # Use the current branch as needed in your workflow
 
