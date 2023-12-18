@@ -1,0 +1,29 @@
+name: Print Current Branch
+
+on:
+  push:
+  workflow_dispatch:
+
+
+jobs:
+  set_current_branch:
+    runs-on: ubuntu-latest
+    outputs:
+      id: current_branch
+      name: CurrentBranch
+
+    steps:
+      - name: Set Current Branch
+        id: set_current_branch
+        run: echo "::set-output name=CurrentBranch::${GITHUB_REF#refs/heads/}"
+
+  use_current_branch:
+    needs: set_current_branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Current Branch
+        run: |
+          current_branch=${{ needs.set_current_branch.outputs.CurrentBranch }}
+          echo "Current Branch: $current_branch" >> $GITHUB_OUTPUT 
+          # Use the current branch as needed in your workflow
