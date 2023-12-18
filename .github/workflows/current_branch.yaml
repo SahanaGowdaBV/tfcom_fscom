@@ -16,7 +16,7 @@ jobs:
         shell: bash
         run: |
           echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-          echo "$branch"
+          echo "branch:$branch"
         id: extract_branch
 
   # use_current_branch:
