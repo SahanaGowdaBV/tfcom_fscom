@@ -15,8 +15,8 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: |
-          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-          echo "branch:$branch"
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo "branch: $branch_name"
         id: extract_branch
 
   # use_current_branch:
