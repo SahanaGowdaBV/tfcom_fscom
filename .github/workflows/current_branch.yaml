@@ -26,6 +26,7 @@ jobs:
       - name: Check for Existing Tag
         shell: bash
         run: |
+          git fetch --tags
           tag=$(git tag)
           echo "tag: $tag"
           if [ -n "$tag" ]; then
