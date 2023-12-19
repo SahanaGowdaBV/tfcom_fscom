@@ -15,19 +15,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         
-      # - name: Extract branch name
-      #   shell: bash
-      #   run: |
-      #     branch_name="${GITHUB_REF#refs/heads/}"
-      #     echo "branch=$branch_name" | tee -a $GITHUB_OUTPUT
-      #     echo "branch: $branch_name"
-      #   id: extract_branch
+      - name: Extract branch name
+        shell: bash
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo "branch=$branch_name" | tee -a $GITHUB_OUTPUT
+          echo "branch: $branch_name"
+        id: extract_branch
 
       - name: Check for Existing Tag
         shell: bash
+        env: 
+          BRANCH: ${{ needs.extract_branch.outputs.branch }}
         run: |
-          git fetch --tags
-          tag=$(git tag)
+          tag=$(echo "$BRANCH" | grep -oE "[0-9]{4}[.-][0-9]{1,2}[.-][0-9]{1,2}")
+          echo "tag=v$tag"
+          # git fetch --tags
+          # tag=$(git tag)
           echo "tag: $tag"
           if [ -n "$tag" ]; then
             echo "Checking for existing tag: $tag"
