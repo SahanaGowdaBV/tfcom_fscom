@@ -20,6 +20,21 @@ jobs:
           echo "branch: $branch_name"
         id: extract_branch
 
+      - name: Check for Existing Tag
+        run: |
+          tag=$(git describe --tags --abbrev=0)
+          if [ -n "$tag" ]; then
+            echo "Checking for existing tag: $tag"
+            if git ls-remote --tags origin | grep -q "$tag"; then
+              echo "Tag $tag already exists in repo! This branch has already been released. Version number on branch needs to be incremented."
+              exit 1
+            else
+              echo "No existing tag found: $tag"
+            fi
+          else
+            echo "Not checking for tag, no tag could be parsed from the branch name"
+          fi
+
   # use_current_branch:
   #   needs: set_current_branch
   #   runs-on: ubuntu-latest
