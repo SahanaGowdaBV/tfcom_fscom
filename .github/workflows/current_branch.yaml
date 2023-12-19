@@ -38,7 +38,7 @@ jobs:
           else
             echo "Not checking for tag, no tag could be parsed from the branch name"
           fi
-
+#
   # use_current_branch:
   #   needs: set_current_branch
   #   runs-on: ubuntu-latest
