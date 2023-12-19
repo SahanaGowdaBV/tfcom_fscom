@@ -7,9 +7,6 @@ on:
 jobs:
   set_current_branch:
     runs-on: ubuntu-latest
-    outputs:
-      id: current_branch
-      name: CurrentBranch
 
     steps:
       - name: Checkout repository
@@ -26,7 +23,7 @@ jobs:
       - name: Check for Existing Tag
         shell: bash
         env: 
-          BRANCH: ${{ needs.extract_branch.outputs.branch }}
+          BRANCH: ${{ steps.extract_branch.outputs.branch }}
         run: |
           tag=$(echo "$BRANCH" | grep -oE "[0-9]{4}[.-][0-9]{1,2}[.-][0-9]{1,2}")
           echo "tag=v$tag"
