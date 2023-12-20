@@ -29,8 +29,6 @@ jobs:
         run: |
           tag=$(echo "$BRANCH" | grep -oE "[0-9]{4}[.-][0-9]{1,2}[.-][0-9]{1,2}")
           echo "tag=v$tag"
-          # git fetch --tags
-          # tag=$(git tag)
           echo "tag: $tag"
           if [ -n "$tag" ]; then
             echo "Checking for existing tag: $tag"
@@ -43,6 +41,13 @@ jobs:
           else
             echo "Not checking for tag, no tag could be parsed from the branch name"
           fi
+
+      - name: Read Pipeline YAML
+        id: read_yaml
+        run: |
+          pipelineYaml=$(cat path/to/pipeline.yaml)
+          echo "Pipeline YAML Content:"
+          echo "$pipelineYaml"
 #
   # use_current_branch:
   #   needs: set_current_branch
