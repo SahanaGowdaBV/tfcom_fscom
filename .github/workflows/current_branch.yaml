@@ -45,7 +45,7 @@ jobs:
       - name: Read Pipeline YAML
         id: read_yaml
         run: |
-          pipelineYaml=$(cat path/to/pipeline.yaml)
+          pipelineYaml=$(cat pipeline.yaml)
           echo "Pipeline YAML Content:"
           echo "$pipelineYaml"
 #
