@@ -68,7 +68,7 @@ jobs:
         env:
           PIPELINE: ${{ needs.main.outputs.pipelinYaml }}
         run: |
-          if [[ $pipeline.yaml | grep grep -q "build:" ]]; then
+          if [[ $pipeline.yaml | grep -q "build:" ]]; then
           echo "run groovy"
           # groovy pipeline.groovy build
 
