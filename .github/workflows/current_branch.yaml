@@ -10,8 +10,8 @@ jobs:
   main:
     runs-on: ubuntu-latest
     outputs: 
-      branch: ${{ steps.main.outputs.BRANCH }}
-      pipelinYaml: ${{ steps.main.outputs.pipelineYaml }}
+      branch: ${{ steps.current_branch.outputs.BRANCH }}
+      pipelineYaml: ${{ steps.read_yaml.outputs.pipelineYaml }}
 
     steps:
       - name: Checkout repository
@@ -23,7 +23,7 @@ jobs:
           branch_name="${GITHUB_REF#refs/heads/}"
           echo "BRANCH=$branch_name" | tee -a $GITHUB_OUTPUT
           echo "branch: $branch_name"
-        id: extract_branch
+        id: current_branch
 
       - name: Check for Existing Tag
         shell: bash
@@ -66,7 +66,7 @@ jobs:
 
       - name: build
         env:
-          PIPELINE: ${{ needs.main.outputs.pipelinYaml }}
+          PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         run: |
           if grep -q "build:" <<< "$PIPELINE"; then
             echo "run groovy"
