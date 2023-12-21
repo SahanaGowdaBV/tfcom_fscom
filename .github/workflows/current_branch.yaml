@@ -48,7 +48,7 @@ jobs:
       - name: Read Pipeline YAML
         id: read_yaml
         run: |
-          pipelineYaml=$(cat pipeline.yaml
+          pipelineYaml=$(cat pipeline.yaml)
           pipelineYaml="${pipelineYaml//'%'/'%25'}"
           pipelineYaml="${pipelineYaml//$'\n'/'%0A'}"
           pipelineYaml="${pipelineYaml//$'\r'/'%0D'}"
