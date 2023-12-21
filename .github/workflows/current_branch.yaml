@@ -7,8 +7,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  set_current_branch:
+  main:
     runs-on: ubuntu-latest
+    outputs: 
+      branch: ${{ steps.main.outputs.BRANCH }}
+      pipelinYaml: ${{ steps.main.outputs.pipelineYaml }}
 
     steps:
       - name: Checkout repository
@@ -18,7 +21,7 @@ jobs:
         shell: bash
         run: |
           branch_name="${GITHUB_REF#refs/heads/}"
-          echo "branch=$branch_name" | tee -a $GITHUB_OUTPUT
+          echo "BRANCH=$branch_name" | tee -a $GITHUB_OUTPUT
           echo "branch: $branch_name"
         id: extract_branch
 
@@ -46,17 +49,23 @@ jobs:
         id: read_yaml
         run: |
           pipelineYaml=$(cat pipeline.yaml)
-          echo "Pipeline YAML Content:"
-          echo "$pipelineYaml"
-#
-  # use_current_branch:
-  #   needs: set_current_branch
-  #   runs-on: ubuntu-latest
+          echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_OUTPUT 
 
-  #   steps:
-  #     - name: Get Current Branch
-  #       run: |
-  #         current_branch=${{ needs.set_current_branch.outputs.CurrentBranch }}
-  #         echo "Current Branch: $current_branch" >> $GITHUB_OUTPUT 
-  #         # Use the current branch as needed in your workflow
+
+  Build:
+    if: ${{ github.job == build }}
+    needs: main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: build
+        env:
+          PIPELINE: ${{ needs.main.outputs.pipelinYaml }}
+        run: |
+          if [[ $pipeline.yaml | grep grep -q "build:" ]]; then
+          echo "run groovy"
+          # groovy pipeline.groovy build
 
