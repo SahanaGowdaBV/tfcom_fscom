@@ -48,9 +48,12 @@ jobs:
       - name: Read Pipeline YAML
         id: read_yaml
         run: |
-          pipelineYaml=$(cat pipeline.yaml)
-          echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_OUTPUT 
-
+          pipelineYaml=$(cat pipeline.yaml
+          pipelineYaml="${pipelineYaml//'%'/'%25'}"
+          pipelineYaml="${pipelineYaml//$'\n'/'%0A'}"
+          pipelineYaml="${pipelineYaml//$'\r'/'%0D'}"
+          echo "::set-output name=pipelineYaml::$pipelineYaml"
+          # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_OUTPUT 
 
   Build:
     # if: ${{ github.job == build }}
