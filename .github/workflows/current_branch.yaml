@@ -72,11 +72,9 @@ jobs:
             echo "run groovy"
             groovy pipeline.groovy build
 
-            if [[ $PIPELINE == *"containerBuild"* && [ -f Dockerfile]]; then
-            echo "containerBuild and docker file found!"
-
+           if [[ $PIPELINE == *"containerBuild"* && -f Dockerfile ]]; then
+              echo "containerBuild and Dockerfile found!"
             fi
-
           fi
 
 
