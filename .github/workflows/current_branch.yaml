@@ -70,7 +70,13 @@ jobs:
         run: |
           if grep -q "build:" <<< "$PIPELINE"; then
             echo "run groovy"
-            # groovy pipeline.groovy build
+            groovy pipeline.groovy build
+
+            if [[ $PIPELINE == *"containerBuild"* && [ -f Dockerfile]]; then
+            echo "containerBuild and docker file found!"
+
+            fi
+
           fi
 
 
