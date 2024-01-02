@@ -97,7 +97,7 @@ jobs:
                 ;;
             esac
       
-            echo "pipelineType=$pipelineType" >> $GITHUB_ENV
+            echo "pipelineType=$pipelineType" >> $GITHUB_OUTPUT
           done < <(echo "$PIPELINE" | grep -oP 'type: \K\w+')
 
           # case $deploymentType in
