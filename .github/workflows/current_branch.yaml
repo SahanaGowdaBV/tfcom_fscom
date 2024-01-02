@@ -80,22 +80,42 @@ jobs:
           # deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
           # echo "deploymentType=$deploymentType" | tee -a >> $GITHUB_OUTPUT
 
-          case $deploymentType in
-            mobility)
-              pipelineType="mobility"
-              ;;
-            K8sClassic)
-              pipelineType="K8sClassic"
-              ;;
-            helm)
-              pipelineType="helm"
-              ;;
-            *)
-              pipelineType="K8sClassic"
-              ;;
-          esac
+
+          while IFS= read -r deploymentType; do
+            case $deploymentType in
+              mobility)
+                pipelineType="mobility"
+                ;;
+              K8sClassic)
+                pipelineType="K8sClassic"
+                ;;
+              helm)
+                pipelineType="helm"
+                ;;
+              *)
+                pipelineType="K8sClassic"
+                ;;
+            esac
       
-          echo "pipelineType=$pipelineType" >> $GITHUB_OUTPUT
+            echo "pipelineType=$pipelineType" >> $GITHUB_ENV
+          done < <(echo "$PIPELINE" | grep -oP 'type: \K\w+')
+
+          # case $deploymentType in
+          #   mobility)
+          #     pipelineType="mobility"
+          #     ;;
+          #   K8sClassic)
+          #     pipelineType="K8sClassic"
+          #     ;;
+          #   helm)
+          #     pipelineType="helm"
+          #     ;;
+          #   *)
+          #     pipelineType="K8sClassic"
+          #     ;;
+          # esac
+      
+          # echo "pipelineType=$pipelineType" >> $GITHUB_OUTPUT
 
           # case $deploymentType in
           #   mobility)
