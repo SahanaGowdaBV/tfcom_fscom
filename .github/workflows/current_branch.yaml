@@ -66,12 +66,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.12.0/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
       - name: Determine Pipeline Type
         env:
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         id: set-pipeline
         run: |
-         deploymentType=$(echo "$PIPELINE" | grep -oP 'type:\s*\K\w+' | head -n1)
+          deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
 
           case $deploymentType in
             mobility)
