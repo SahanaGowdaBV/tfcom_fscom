@@ -8,7 +8,7 @@ containerBuild:
 
  
 deployment:
-  # type: mobility
+  type: helm
   name: tfop-query-api
   namespace: tfop
 # deployment:
