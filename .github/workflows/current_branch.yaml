@@ -80,6 +80,23 @@ jobs:
           # deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
           echo "deploymentType=$deploymentType" | tee -a >> $GITHUB_OUTPUT
 
+          case $deploymentType in
+            mobility)
+              pipelineType="mobility"
+              ;;
+            K8sClassic)
+              pipelineType="K8sClassic"
+              ;;
+            helm)
+              pipelineType="helm"
+              ;;
+            *)
+              pipelineType="K8sClassic"
+              ;;
+          esac
+      
+          echo "pipelineType=$pipelineType" >> $GITHUB_ENV
+
           # case $deploymentType in
           #   mobility)
           #     echo "pipeline=mobility" >> $GITHUB_ENV
@@ -96,8 +113,10 @@ jobs:
           # esac
 
       - name: Print Pipeline Type
+        env:
+          pipelinetype: ${{ steps.set-pipeline.outputs.pipelineType }}
         run: |
-          echo "Pipeline Type: ${{ steps.set-pipeline.outputs.deploymentType }}"
+          echo "Pipeline Type: $pipelinetype"
 
 
       # - name: build
