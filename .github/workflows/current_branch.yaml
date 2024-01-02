@@ -78,7 +78,6 @@ jobs:
         run: |
           # deploymentType=$(echo "$PIPELINE" | grep -oP 'type: \K\w+' | head -n1)
           # deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
-          # echo "deploymentType=$deploymentType" | tee -a >> $GITHUB_OUTPUT
 
 
           while IFS= read -r deploymentType; do
@@ -98,7 +97,8 @@ jobs:
             esac
       
             echo "pipelineType=$pipelineType" >> $GITHUB_OUTPUT
-          done < <(echo "$PIPELINE" | grep -oP 'type: \K\w+')
+          # done < <(echo "$PIPELINE" | grep -oP 'type: \K\w+')
+          done < <(echo "$PIPELINE" | yq eval '.deployment.type' -)
 
           # case $deploymentType in
           #   mobility)
