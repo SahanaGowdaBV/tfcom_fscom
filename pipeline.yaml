@@ -8,7 +8,7 @@ containerBuild:
 
  
 deployment:
-  type: helm
+  # type: helm
   name: tfop-query-api
   namespace: tfop
 # deployment:
