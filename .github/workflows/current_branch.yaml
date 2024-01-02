@@ -76,26 +76,27 @@ jobs:
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         id: set-pipeline
         run: |
-          deploymentType=$(echo "$PIPELINE" | grep -oP 'type:\s*\K\w+' | head -n1)
+          deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
+          echo "deploymentType=$deploymentType" | tee -a >> $GITHUB_OUTPUT
 
-          case $deploymentType in
-            mobility)
-              echo "pipeline=mobility" >> $GITHUB_ENV
-              ;;
-            K8sClassic)
-              echo "pipeline=K8sClassic" >> $GITHUB_ENV
-              ;;
-            helm)
-              echo "pipeline=helm" >> $GITHUB_ENV
-              ;;
-            *)
-              echo "pipeline=K8sClassic" >> $GITHUB_ENV
-              ;;
-          esac
+          # case $deploymentType in
+          #   mobility)
+          #     echo "pipeline=mobility" >> $GITHUB_ENV
+          #     ;;
+          #   K8sClassic)
+          #     echo "pipeline=K8sClassic" >> $GITHUB_ENV
+          #     ;;
+          #   helm)
+          #     echo "pipeline=helm" >> $GITHUB_ENV
+          #     ;;
+          #   *)
+          #     echo "pipeline=K8sClassic" >> $GITHUB_ENV
+          #     ;;
+          # esac
 
       - name: Print Pipeline Type
         run: |
-          echo "Pipeline Type: ${{ steps.set-pipeline.outputs.pipeline }}"
+          echo "Pipeline Type: ${{ steps.set-pipeline.outputs.deploymentType }}"
 
 
       # - name: build
