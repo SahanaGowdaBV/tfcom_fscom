@@ -74,7 +74,7 @@ jobs:
       - name: Determine Pipeline Type
         id: set-pipeline
         run: |
-          deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
+          deploymentType=$(echo "$PIPELINE" | grep -oP 'type:\s*\K\w+' | head -n1)
 
           case $deploymentType in
             mobility)
