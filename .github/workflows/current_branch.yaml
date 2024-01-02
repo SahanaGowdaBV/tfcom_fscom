@@ -89,7 +89,8 @@ jobs:
           esac
 
       - name: Print Pipeline Type
-        run: echo "Pipeline Type: ${{ steps.set-pipeline.outputs.pipelineType }}"
+        run: |
+          echo "Pipeline Type: ${{ steps.set-pipeline.outputs.pipelineType }}"
 
       # - name: build
       #   env:
