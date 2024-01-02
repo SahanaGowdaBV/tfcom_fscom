@@ -78,7 +78,7 @@ jobs:
         run: |
           deploymentType=$(echo "$PIPELINE" | grep -oP 'type: \K\w+' | head -n1)
           # deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
-          echo "deploymentType=$deploymentType" | tee -a >> $GITHUB_OUTPUT
+          # echo "deploymentType=$deploymentType" | tee -a >> $GITHUB_OUTPUT
 
           case $deploymentType in
             mobility)
@@ -95,7 +95,7 @@ jobs:
               ;;
           esac
       
-          echo "pipelineType=$pipelineType" >> $GITHUB_ENV
+          echo "pipelineType=$pipelineType" >> $GITHUB_OUTPUT
 
           # case $deploymentType in
           #   mobility)
