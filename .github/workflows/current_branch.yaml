@@ -56,6 +56,7 @@ jobs:
           echo "::set-env name=pipelineYaml::$pipelineYaml"
           # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_OUTPUT 
 
+
   Build:
     # if: ${{ github.job == build }}
     needs: main
@@ -65,17 +66,42 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: build
+      - name: Determine Pipeline Type
         env:
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
+        id: set-pipeline
         run: |
-          if grep -q "build:" <<< "$PIPELINE"; then
-            echo "run groovy"
-            # groovy pipeline.groovy build
+          deploymentType=$(awk '/type:/ {print $2}' $PIPELINE)
 
-          elif [[ $PIPELINE == *"containerBuild"* && -f Dockerfile ]]; then
-              echo "containerBuild and Dockerfile found!"
+          case $deploymentType in
+            mobility)
+              echo "pipeline=mobility" >> $GITHUB_ENV
+              ;;
+            K8sClassic)
+              echo "pipeline=K8sClassic" >> $GITHUB_ENV
+              ;;
+            helm)
+              echo "pipeline=helm" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "pipeline=K8sClassic" >> $GITHUB_ENV
+              ;;
+          esac
+
+      - name: Print Pipeline Type
+        run: echo "Pipeline Type: ${{ steps.set-pipeline.outputs.pipelineType }}"
+
+      # - name: build
+      #   env:
+      #     PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
+      #   run: |
+      #     if grep -q "build:" <<< "$PIPELINE"; then
+      #       echo "run groovy"
+      #       # groovy pipeline.groovy build
+
+      #     elif [[ $PIPELINE == *"containerBuild"* && -f Dockerfile ]]; then
+      #         echo "containerBuild and Dockerfile found!"
             
-          fi
+      #     fi
 
 
