@@ -8,7 +8,7 @@ containerBuild:
 
  
 deployment:
-  type: K8sClassic
+  # type: K8sClassic
   name: tfop-query-api
   namespace: tfop
 # deployment:
