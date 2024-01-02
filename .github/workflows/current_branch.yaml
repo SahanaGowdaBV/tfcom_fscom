@@ -76,7 +76,8 @@ jobs:
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         id: set-pipeline
         run: |
-          deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
+          deploymentType=$(echo "$PIPELINE" | grep -oP 'type: \K\w+' | head -n1)
+          # deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
           echo "deploymentType=$deploymentType" | tee -a >> $GITHUB_OUTPUT
 
           # case $deploymentType in
