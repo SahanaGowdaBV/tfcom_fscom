@@ -69,7 +69,7 @@ jobs:
       - name: Determine Pipeline Type
         id: set-pipeline
         run: |
-          deploymentType=$(echo "$PIPELINE" | grep -oP 'type: \K\w+' | head -n1)
+         deploymentType=$(echo "$PIPELINE" | grep -oP 'type:\s*\K\w+' | head -n1)
 
           case $deploymentType in
             mobility)
