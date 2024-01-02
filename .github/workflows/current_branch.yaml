@@ -93,7 +93,7 @@ jobs:
 
       - name: Print Pipeline Type
         run: |
-          echo "Pipeline Type: ${{ steps.set-pipeline.outputs.pipelineType }}"
+          echo "Pipeline Type: ${{ steps.set-pipeline.outputs.pipeline }}"
 
 
       # - name: build
