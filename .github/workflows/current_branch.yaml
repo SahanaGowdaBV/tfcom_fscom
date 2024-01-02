@@ -71,7 +71,7 @@ jobs:
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         id: set-pipeline
         run: |
-          deploymentType=$(awk '/type:/ {print $2}' $PIPELINE)
+          deploymentType=$(echo "$PIPELINE" | awk '/type:/ {print $2}')
 
           case $deploymentType in
             mobility)
