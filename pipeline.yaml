@@ -6,9 +6,14 @@ build:
 containerBuild:
   imageName: test
 
+ 
 deployment:
-  name: techops-hello-world
-  namespace: techops
+  type: mobility
+  name: tfop-query-api
+  namespace: tfop
+# deployment:
+#   name: techops-hello-world
+#   namespace: techops
   cpu: 100m
   memory: 2Gi
   # replicas: 1
