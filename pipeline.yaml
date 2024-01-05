@@ -1,27 +1,23 @@
 build:
-#   image: openjdk:8u151-jdk-alpine
-#   steps:
-#     - ./gradlew clean build -x test --stacktrace
+  image: openjdk:8u151-jdk-alpine
+  steps:
+    - ./gradlew clean build -x test --stacktrace
 
 containerBuild:
   imageName: test
 
  
 deployment:
-  type: mobility
-  name: tfop-query-api
-  namespace: tfop
-# deployment:
-#   name: techops-hello-world
-#   namespace: techops
+  name: techops-hello-world
+  namespace: techops
   cpu: 100m
   memory: 2Gi
-  # replicas: 1
-  # containerPort: 9090
-  # healthCheckPath: /actuator/health 
-  # healthCheckPort: 9090
-  # ingressPath: /
-  # iamRole: techops
+  replicas: 1
+  containerPort: 9090
+  healthCheckPath: /actuator/health 
+  healthCheckPort: 9090
+  ingressPath: /
+  iamRole: techops
   ###startupSeconds: 180
 
 environments:
