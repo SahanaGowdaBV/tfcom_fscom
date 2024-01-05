@@ -145,7 +145,6 @@ jobs:
             echo "Checking for containerBuild in $PIPELINE"
             
             # Print the content of PIPELINE for debugging
-            echo "PIPELINE content:"
             
             echo "YAML validation successful"
           fi
