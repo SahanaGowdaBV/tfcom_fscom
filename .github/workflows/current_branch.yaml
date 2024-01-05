@@ -108,7 +108,7 @@ jobs:
           pipelinetype: ${{ steps.set-pipeline.outputs.pipelineType }}
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         run: |
-          if [ "${PIPELINE_TYPE}" = "K8sClassic" ] || [ "${PIPELINE_TYPE}" = "mobility" ]; then
+          if [ "${pipelinetype}" = "K8sClassic" ] || [ "${pipelinetype}" = "mobility" ]; then
             echo "Checking for containerBuild in $PIPELINE"
           
             # Print the content of PIPELINE for debugging
