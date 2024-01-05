@@ -8,7 +8,7 @@ containerBuild:
 
  
 deployment:
-  name: techops-hello-world
+  # name: techops-hello-world
   namespace: techops
   cpu: 100m
   memory: 2Gi
