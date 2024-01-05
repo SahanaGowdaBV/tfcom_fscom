@@ -109,7 +109,7 @@ jobs:
         run: |
           if [ "${PIPELINE_TYPE}" = "K8sClassic" ] || [ "${PIPELINE_TYPE}" = "mobility" ]; then
             # Check if containerBuild exists
-            if yq eval '.containerBuild' "$PIPELINE" >/dev/null 2>&1; then
+            if yq eval '.containerBuild' "$PIPELINE"; then
               echo "containerBuild is present"
             else
               echo "Configuration error: missing containerBuild" >&2
