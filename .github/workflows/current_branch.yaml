@@ -109,28 +109,25 @@ jobs:
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         run: |
           if [ "${pipelinetype}" = "K8sClassic" ] || [ "${pipelinetype}" = "mobility" ]; then
-            echo "Checking for containerBuild in $PIPELINE"
-            
-            # Print the content of PIPELINE for debugging
-            echo "PIPELINE content:"
-            echo "$PIPELINE"
-      
+            echo "Checking for containerBuild in pipeline.yaml"     
             # Check if .containerBuild exists
-            if [ "$(echo "$PIPELINE" | yq eval '.containerBuild' -)" != "null" ]; then
-              echo "containerBuild is present"
+            if [ "$(echo "$PIPELINE" | yq eval '.containerBuild' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.containerBuild.imageName' -)" != "null" ]; then
+              echo "containerBuild and imageName is present"
             else
-              echo "Configuration error: missing containerBuild" >&2
+              echo "Configuration error: missing containerBuild and imageName" >&2
               exit 1
             fi
       
-            # Check if .containerBuild.imageName exists
-            if [ "$(echo "$PIPELINE" | yq eval '.containerBuild.imageName' -)" != "null" ]; then
-              echo "containerBuild.imageName is present"
-            else
-              echo "Configuration error: missing containerBuild" >&2
-              exit 1
-            fi
+            # # Check if .containerBuild.imageName exists
+            # if [ "$(echo "$PIPELINE" | yq eval '.containerBuild.imageName' -)" != "null" ]; then
+            #   echo "containerBuild.imageName is present"
+            # else
+            #   echo "Configuration error: missing containerBuild" >&2
+            #   exit 1
+            # fi
 
+            echo "Checking for build in pipeline.yaml" 
+            # Check if .containerBuild exists
             if [ "$(echo "$PIPELINE" | yq eval '.build' -)" != "null" ]; then
               if [ "$(echo "$PIPELINE" | yq eval '.build.image' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.build.steps' -)" != "null" ]; then
                 echo "build.image and build.steps are present"
@@ -140,6 +137,14 @@ jobs:
               fi
             fi
 
+            echo "Checking for deployment in pipeline.yaml"     
+            # Check if .deployment exists
+            if [ "$(echo "$PIPELINE" | yq eval '.deployment.name' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.namespace' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.containerPort' -)" != "null" ]&& [ "$(echo "$PIPELINE" | yq eval '.deployment.replicas' -)" != "null" ]&& [ "$(echo "$PIPELINE" | yq eval '.deployment.healthCheckPath' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.healthCheckPort' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.cpu' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.memory' -)" != "null" ] ; then
+              echo "deployment, name, namespace, containerPort, replicas, healthCheckPath,healthCheckPort, cpu, memory is present"
+            else
+              echo "Configuration error: missing Deployment/name/namespace/containerPort/replicas/healthCheckPath/healthCheckPort/cpu/memory " >&2
+              exit 1
+            fi
 
             echo "#########TESTING############"
             echo "Checking for containerBuild in pipeline"
