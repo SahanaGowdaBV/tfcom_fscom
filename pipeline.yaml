@@ -3,7 +3,8 @@ build:
   steps:
     - ./gradlew clean build -x test --stacktrace
 
-
+# containerBuild:
+#   imageName: test
 
  
 deployment:
