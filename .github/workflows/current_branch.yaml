@@ -146,6 +146,16 @@ jobs:
               exit 1
             fi
 
+            echo "Checking for deployment.prometheus in pipeline.yaml" 
+            # Check if .containerBuild exists
+            if [ "$(echo "$PIPELINE" | yq eval '.deployment.prometheus' -)" != "null" ]; then
+              if [ "$(echo "$PIPELINE" | yq eval '.deployment.prometheus.port' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.prometheus.type' -)" != "null" ]; then
+                echo "deployment.prometheus.port and deployment.prometheus.type are present"
+              else
+                echo "Configuration error: missing deployment.prometheus.port or deployment.prometheus.type" >&2
+                exit 1
+              fi
+            fi
             echo "#########TESTING############"
             echo "Checking for containerBuild in pipeline"
             
