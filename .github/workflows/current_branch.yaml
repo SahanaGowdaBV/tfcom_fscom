@@ -109,60 +109,76 @@ jobs:
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         run: |
           if [ "${pipelinetype}" = "K8sClassic" ] || [ "${pipelinetype}" = "mobility" ]; then
-            echo "Checking for containerBuild in pipeline.yaml"     
-            # Check if .containerBuild exists
-            if [ "$(echo "$PIPELINE" | yq eval '.containerBuild' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.containerBuild.imageName' -)" != "null" ]; then
-              echo "containerBuild and imageName is present"
-            else
-              echo "Configuration error: missing containerBuild and imageName" >&2
-              exit 1
-            fi
+            keys=$(echo "$PIPELINE" | yq eval '.environments | keys_unsorted | .[]' -)
+            
+            # Loop through the keys (environments)
+            for key in $keys; do
+              if [ "$(echo "$PIPELINE" | yq eval '.environments."'"${key}"'".promotion' -)" != "null" ]; then
+                if [ "$(echo "$PIPELINE" | yq eval '.environments."'"${key}"'".promotion.to' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.environments."'"${key}"'".promotion.mergeTo' -)" != "null" ]; then
+                  echo "Validation successful for $key"
+                else
+                  echo "Configuration error: missing promotion.to or promotion.mergeTo for $key" >&2
+                  exit 1
+                fi
+              fi
+            done
+
+
+          
+          #   echo "Checking for containerBuild in pipeline.yaml"     
+          #   # Check if .containerBuild exists
+          #   if [ "$(echo "$PIPELINE" | yq eval '.containerBuild' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.containerBuild.imageName' -)" != "null" ]; then
+          #     echo "containerBuild and imageName is present"
+          #   else
+          #     echo "Configuration error: missing containerBuild and imageName" >&2
+          #     exit 1
+          #   fi
       
-            # # Check if .containerBuild.imageName exists
-            # if [ "$(echo "$PIPELINE" | yq eval '.containerBuild.imageName' -)" != "null" ]; then
-            #   echo "containerBuild.imageName is present"
-            # else
-            #   echo "Configuration error: missing containerBuild" >&2
-            #   exit 1
-            # fi
+          #   # # Check if .containerBuild.imageName exists
+          #   # if [ "$(echo "$PIPELINE" | yq eval '.containerBuild.imageName' -)" != "null" ]; then
+          #   #   echo "containerBuild.imageName is present"
+          #   # else
+          #   #   echo "Configuration error: missing containerBuild" >&2
+          #   #   exit 1
+          #   # fi
 
-            echo "Checking for build in pipeline.yaml" 
-            # Check if .containerBuild exists
-            if [ "$(echo "$PIPELINE" | yq eval '.build' -)" != "null" ]; then
-              if [ "$(echo "$PIPELINE" | yq eval '.build.image' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.build.steps' -)" != "null" ]; then
-                echo "build.image and build.steps are present"
-              else
-                echo "Configuration error: missing build.image or build.steps" >&2
-                exit 1
-              fi
-            fi
+          #   echo "Checking for build in pipeline.yaml" 
+          #   # Check if .containerBuild exists
+          #   if [ "$(echo "$PIPELINE" | yq eval '.build' -)" != "null" ]; then
+          #     if [ "$(echo "$PIPELINE" | yq eval '.build.image' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.build.steps' -)" != "null" ]; then
+          #       echo "build.image and build.steps are present"
+          #     else
+          #       echo "Configuration error: missing build.image or build.steps" >&2
+          #       exit 1
+          #     fi
+          #   fi
 
-            echo "Checking for deployment in pipeline.yaml"     
-            # Check if .deployment exists
-            if [ "$(echo "$PIPELINE" | yq eval '.deployment.name' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.namespace' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.containerPort' -)" != "null" ]&& [ "$(echo "$PIPELINE" | yq eval '.deployment.replicas' -)" != "null" ]&& [ "$(echo "$PIPELINE" | yq eval '.deployment.healthCheckPath' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.healthCheckPort' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.cpu' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.memory' -)" != "null" ] ; then
-              echo "deployment, name, namespace, containerPort, replicas, healthCheckPath,healthCheckPort, cpu, memory is present"
-            else
-              echo "Configuration error: missing Deployment/name/namespace/containerPort/replicas/healthCheckPath/healthCheckPort/cpu/memory " >&2
-              exit 1
-            fi
+          #   echo "Checking for deployment in pipeline.yaml"     
+          #   # Check if .deployment exists
+          #   if [ "$(echo "$PIPELINE" | yq eval '.deployment.name' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.namespace' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.containerPort' -)" != "null" ]&& [ "$(echo "$PIPELINE" | yq eval '.deployment.replicas' -)" != "null" ]&& [ "$(echo "$PIPELINE" | yq eval '.deployment.healthCheckPath' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.healthCheckPort' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.cpu' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.memory' -)" != "null" ] ; then
+          #     echo "deployment, name, namespace, containerPort, replicas, healthCheckPath,healthCheckPort, cpu, memory is present"
+          #   else
+          #     echo "Configuration error: missing Deployment/name/namespace/containerPort/replicas/healthCheckPath/healthCheckPort/cpu/memory " >&2
+          #     exit 1
+          #   fi
 
-            echo "Checking for deployment.prometheus in pipeline.yaml" 
-            # Check if .containerBuild exists
-            if [ "$(echo "$PIPELINE" | yq eval '.deployment.prometheus' -)" != "null" ]; then
-              if [ "$(echo "$PIPELINE" | yq eval '.deployment.prometheus.port' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.prometheus.type' -)" != "null" ]; then
-                echo "deployment.prometheus.port and deployment.prometheus.type are present"
-              else
-                echo "Configuration error: missing deployment.prometheus.port or deployment.prometheus.type" >&2
-                exit 1
-              fi
-            fi
-            echo "#########TESTING############"
-            echo "Checking for containerBuild in pipeline"
+          #   echo "Checking for deployment.prometheus in pipeline.yaml" 
+          #   # Check if .containerBuild exists
+          #   if [ "$(echo "$PIPELINE" | yq eval '.deployment.prometheus' -)" != "null" ]; then
+          #     if [ "$(echo "$PIPELINE" | yq eval '.deployment.prometheus.port' -)" != "null" ] && [ "$(echo "$PIPELINE" | yq eval '.deployment.prometheus.type' -)" != "null" ]; then
+          #       echo "deployment.prometheus.port and deployment.prometheus.type are present"
+          #     else
+          #       echo "Configuration error: missing deployment.prometheus.port or deployment.prometheus.type" >&2
+          #       exit 1
+          #     fi
+          #   fi
+          #   echo "#########TESTING############"
+          #   echo "Checking for containerBuild in pipeline"
             
-            # Print the content of PIPELINE for debugging
+          #   # Print the content of PIPELINE for debugging
             
-            echo "YAML validation successful"
-          fi
+          #   echo "YAML validation successful"
+          # fi
 
 
           # if [ "${PIPELINE_TYPE}" = "K8sClassic" ] || [ "${PIPELINE_TYPE}" = "mobility" ]; then
