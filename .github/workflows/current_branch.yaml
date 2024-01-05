@@ -125,7 +125,7 @@ jobs:
       
             # Check if .containerBuild.imageName exists
             if [ "$(echo "$PIPELINE" | yq eval '.containerBuild.imageName' -)" != "null" ]; then
-              echo "containerBuild is present"
+              echo "containerBuild.imageName is present"
             else
               echo "Configuration error: missing containerBuild" >&2
               exit 1
