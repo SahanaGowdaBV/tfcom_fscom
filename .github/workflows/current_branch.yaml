@@ -116,7 +116,7 @@ jobs:
             echo "$PIPELINE"
       
             # Check if .containerBuild exists
-            if echo "$PIPELINE" | yq eval '.deployment.type' -; then
+            if echo "$PIPELINE" | yq eval '.containerBuild.imageName' -; then
               echo "containerBuild is present"
             else
               echo "Configuration error: missing containerBuild" >&2
