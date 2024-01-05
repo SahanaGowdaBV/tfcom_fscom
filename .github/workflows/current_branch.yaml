@@ -116,7 +116,7 @@ jobs:
             echo "$PIPELINE"
       
             # Check if .containerBuild exists
-            if echo "$PIPELINE" | yq eval '.build.containerBuild' - >/dev/null 2>&1; then
+            if echo "$PIPELINE" | yq eval 'select(has("build") and has("containerBuild"))' - >/dev/null 2>&1; then
               echo "containerBuild is present"
             else
               echo "Configuration error: missing containerBuild" >&2
