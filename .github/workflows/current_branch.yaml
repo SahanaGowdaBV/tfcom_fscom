@@ -99,44 +99,46 @@ jobs:
             echo "pipelineType=$pipelineType" >> $GITHUB_OUTPUT
           # done < <(echo "$PIPELINE" | grep -oP 'type: \K\w+')
           done < <(echo "$PIPELINE" | yq eval '.deployment.type' -)
+            
 
-          # case $deploymentType in
-          #   mobility)
-          #     pipelineType="mobility"
-          #     ;;
-          #   K8sClassic)
-          #     pipelineType="K8sClassic"
-          #     ;;
-          #   helm)
-          #     pipelineType="helm"
-          #     ;;
-          #   *)
-          #     pipelineType="K8sClassic"
-          #     ;;
-          # esac
-      
-          # echo "pipelineType=$pipelineType" >> $GITHUB_OUTPUT
-
-          # case $deploymentType in
-          #   mobility)
-          #     echo "pipeline=mobility" >> $GITHUB_ENV
-          #     ;;
-          #   K8sClassic)
-          #     echo "pipeline=K8sClassic" >> $GITHUB_ENV
-          #     ;;
-          #   helm)
-          #     echo "pipeline=helm" >> $GITHUB_ENV
-          #     ;;
-          #   *)
-          #     echo "pipeline=K8sClassic" >> $GITHUB_ENV
-          #     ;;
-          # esac
-
-      - name: Print Pipeline Type
+      - name: Validate
+        id: validate
         env:
           pipelinetype: ${{ steps.set-pipeline.outputs.pipelineType }}
+          PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         run: |
-          echo "Pipeline Type: $pipelinetype"
+          if [ "${PIPELINE_TYPE}" = "K8sClassic" ] || [ "${PIPELINE_TYPE}" = "mobility" ]; then
+            # Check if containerBuild exists
+            if ! yq eval '.containerBuild' "$PIPELINE" >/dev/null 2>&1; then
+              echo "Configuration error: missing containerBuild" >&2
+              exit 1
+            fi
+
+            # Check if imageName under containerBuild exists
+            if ! yq eval '.containerBuild.imageName' path/to/your/file.yaml >/dev/null 2>&1; then
+              echo "Configuration error: missing containerBuild.imageName" >&2
+              exit 1
+            fi
+            echo "YAML validation successful"
+          fi
+              
+
+          #   echo "YAML validation successful"
+          # elif [ "${PIPELINE_TYPE}" = "mobility" ]; then
+          #   # Check if mobility exists
+          #   if ! yq eval '.containerBuild' path/to/your/file.yaml >/dev/null 2>&1; then
+          #     echo "Configuration error: missing containerBuild" >&2
+          #     exit 1
+          #   fi
+
+          #   # Check if mobility containerBuild exists
+          #   if ! yq eval '.containerBuild.imageName' path/to/your/file.yaml >/dev/null 2>&1; then
+          #     echo "Configuration error: missing containerBuild.imageName" >&2
+          #     exit 1
+          #   fi
+
+          #   echo "YAML validation successful"
+          # fi
 
 
       # - name: build
