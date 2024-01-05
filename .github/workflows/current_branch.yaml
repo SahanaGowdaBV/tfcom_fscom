@@ -142,7 +142,7 @@ jobs:
 
 
             echo "#########TESTING############"
-            echo "Checking for containerBuild in $PIPELINE"
+            echo "Checking for containerBuild in pipeline"
             
             # Print the content of PIPELINE for debugging
             
