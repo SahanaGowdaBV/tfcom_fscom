@@ -106,7 +106,7 @@ jobs:
             
 
       - name: Validate K8sClassic and mobility
-        if: ${{ [ ${pipelinetype}" = "K8sClassic" ] || [ "${pipelinetype}" = "mobility" ] }}
+        if: ${{ env.pipelinetype == 'K8sClassic' || env.pipelinetype == 'mobility' }}
         id: validate-K8sClassic
         env:
           pipelinetype: ${{ steps.set-pipeline.outputs.pipelineType }}
@@ -178,7 +178,7 @@ jobs:
             fi
 
       - name: Validate Helm
-        if: ${{ [ ${pipelinetype}" = "helm" ] }}
+        if: ${{ env.pipelinetype == "helm" }}
         id: validate-helm
         env:
           pipelinetype: ${{ steps.set-pipeline.outputs.pipelineType }}
@@ -239,7 +239,7 @@ jobs:
             fi
 
       - name: Validate S3
-        if: ${{ [ ${pipelinetype}" = "K8sClassic" ] || [ "${pipelinetype}" = "mobility" ] }}
+        if: ${{ env.pipelinetype = "K8sClassic" || [ "${pipelinetype}" = "mobility" ] }}
         id: validate-S3
         env:
           pipelinetype: ${{ steps.set-pipeline.outputs.pipelineType }}
