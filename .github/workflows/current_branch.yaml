@@ -299,6 +299,26 @@ jobs:
           image=$(echo "$PIPELINE" | yq eval '.build.image // ""')
           echo "image: $image"
 
+      - name: Pull image name
+        id: build-image
+        env:
+            PIPELINE: ${{ needs.main.outputs.pipelineYaml }}        
+        run: |
+            image=$(echo "$PIPELINE" | yq eval '.build.image // ""')
+            echo "image=$image" >> GITHUB_OUTPUT
+            echo "image: $image"
+            
+            steps=$(echo "$PIPELINE" | yq eval '.build.steps // ""')
+            echo "steps=$steps" >> GITHUB_OUTPUT
+            echo "steps: $steps"
+
+      - name: Run Docker Build
+        env: 
+          IMAGE: ${{ steps.build-image.outputs.image }}
+          STEPS: ${{ steps.build-image.outputs.steps }}
+        run: | 
+            echo "$STEPS"
+
           # echo "Validating the branch for environments:"
 
           # # Loop through environments
