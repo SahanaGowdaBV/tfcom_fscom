@@ -8,6 +8,7 @@ containerBuild:
 
  
 deployment:
+  type: helm
   name: techops-hello-world
   namespace: techops
   cpu: 100m
