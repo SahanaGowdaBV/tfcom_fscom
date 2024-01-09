@@ -290,7 +290,25 @@ jobs:
               exit 1
             fi
 
-              
+      - name: Validate the branch
+        id: validate-branch
+        env:
+          CURRENT_BRANCH: ${{ steps.current_branch.outputs.BRANCH }}
+          PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
+        run: |
+          echo "Validating the branch for environments:"
+
+          # Loop through environments
+          keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
+          for key in $keys; do
+            branch=$(echo "$PIPELINE" | yq eval ".environments.$key.branch" -)
+            echo "Environment: $key, Branch: $branch"
+
+            # Check if the current branch matches the environment branch
+            if [ "${CURRENT_BRANCH}" = "${branch}" ]; then
+              echo "Current branch matches for environment: $key"
+            fi
+          done           
 
           #   echo "YAML validation successful"
           # elif [ "${PIPELINE_TYPE}" = "mobility" ]; then
