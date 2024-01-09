@@ -293,7 +293,7 @@ jobs:
       - name: Validate the branch
         id: validate-branch
         env:
-          CURRENT_BRANCH: ${{ needs.current_branch.outputs.branch }}
+          CURRENT_BRANCH: ${{ needs.main.outputs.branch }}
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         run: |
           echo "Validating the branch for environments:"
