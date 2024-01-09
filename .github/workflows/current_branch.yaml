@@ -306,9 +306,10 @@ jobs:
         env:
             PIPELINE: ${{ needs.main.outputs.pipelineYaml }}        
         run: |
-            IMAGE=$(echo "$PIPELINE" | yq eval '.build.image // ""')
-            echo "IMAGE=$IMAGE" >> GITHUB_OUTPUT
-            echo "IMAGE: $IMAGE"
+            image=$(echo "$PIPELINE" | yq eval '.build.image // ""')
+            echo "::set-output name=image::$image"
+            # echo "image=$image" >> GITHUB_OUTPUT
+            echo "image: $image"
             
             steps=$(echo "$PIPELINE" | yq eval '.build.steps // ""')
             echo "steps=$steps" >> GITHUB_ENV
