@@ -302,7 +302,7 @@ jobs:
           keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
           for key in $keys; do
             branch=$(echo "$PIPELINE" | yq eval ".environments.$key.branch" -)
-            echo "Environment: $key, Branch: $branch"
+            echo "Environment: $key, Branch in YAML: $branch, Current Branch: $CURRENT_BRANCH"
 
             # Check if the current branch matches the environment branch
             if [ "${branch}" != "null" ] && [[ "${CURRENT_BRANCH}" == *"${branch}"* ]]; then
