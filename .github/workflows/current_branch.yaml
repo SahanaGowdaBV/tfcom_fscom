@@ -299,25 +299,21 @@ jobs:
           image=$(echo "$PIPELINE" | yq eval '.build.image // ""')
           echo "image: $image"
 
-      - name: Pull image name
-        id: build-image
-        env:
-            PIPELINE: ${{ needs.main.outputs.pipelineYaml }}        
+      - name: Get Pipeline Image and Steps
+        id: get-image-steps
         run: |
-            image=$(echo "$PIPELINE" | yq eval '.build.image // ""')
-            echo "image=$image" >> $GITHUB_ENV
-            echo "image: $image"
-            
-            steps=$(echo "$PIPELINE" | yq eval '.build.steps // ""')
-            echo "steps=$steps" >> $GITHUB_ENV
-            echo "steps: $steps"
+          IMAGE=$(./yq eval '.build.image // ""' pipeline.yaml)
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+          STEPS=$(./yq eval '.build.steps // ""' pipeline.yaml)
+          echo "STEPS=$STEPS" >> $GITHUB_ENV
 
       - name: Run Docker Build
         env:
           IMAGE: ${{ env.IMAGE }}
           STEPS: ${{ env.STEPS }}
-        run: | 
-            echo "$STEPS"
+        run: |
+          echo "$STEPS"
 
           # echo "Validating the branch for environments:"
 
