@@ -134,9 +134,9 @@ jobs:
             keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
             for key in $keys; do
               if [ "$(echo "$PIPELINE" | yq eval '.environments."'"${key}"'".cluster' -)" != "null" ]; then
-                echo "envirnment cluster is present"
+                echo "envirnment cluster is present for $key"
               else
-                echo "Configuration error: missing envirnment cluster" >&2
+                echo "Configuration error: missing envirnment cluster for $key" >&2
               exit 1
               fi
             done
