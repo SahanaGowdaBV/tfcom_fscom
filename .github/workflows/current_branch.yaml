@@ -110,7 +110,7 @@ jobs:
         run: |
           if [ "${pipelinetype}" = "K8sClassic" ] || [ "${pipelinetype}" = "mobility" ]; then
             keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
-            
+      
             # Loop through the keys (environments)
             for key in $keys; do
               if [ "$(echo "$PIPELINE" | yq eval '.environments."'"${key}"'".promotion' -)" != "null" ]; then
@@ -122,7 +122,7 @@ jobs:
                 fi
               fi
             done
-
+          fi
 
           
           #   echo "Checking for containerBuild in pipeline.yaml"     
