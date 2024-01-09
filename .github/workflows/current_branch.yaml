@@ -320,8 +320,8 @@ jobs:
           IMAGE: ${{ steps.build-image.outputs.IMAGE }}
           STEPS: ${{ steps.build-image.outputs.steps }}
         run: | 
-            echo "$STEPS"
-            echo "$IMAGE"
+          echo "IMAGE: $IMAGE"
+          echo "STEPS: $STEPS"
 
           # echo "Validating the branch for environments:"
 
