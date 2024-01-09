@@ -61,6 +61,8 @@ jobs:
     # if: ${{ github.job == build }}
     needs: main
     runs-on: ubuntu-latest
+    outputs: 
+      image: ${{ steps.build-image.outputs.IMAGE }}
 
     steps:
       - name: Checkout repository
@@ -315,7 +317,7 @@ jobs:
       - name: Run Docker Build
         id: docker-run
         env: 
-          IMAGE: ${{ steps.build-image.outputs.IMAGE }}
+          IMAGE: ${{ needs.Build.outputs.image }}
           STEPS: ${{ steps.build-image.outputs.steps }}
         run: | 
             echo "$STEPS"
