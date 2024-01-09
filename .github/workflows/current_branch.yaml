@@ -239,7 +239,7 @@ jobs:
             fi
 
       - name: Validate S3
-        if: ${{ env.pipelinetype = 'S3' }}
+        if: ${{ env.pipelinetype == 'S3' }}
         id: validate-S3
         env:
           pipelinetype: ${{ steps.set-pipeline.outputs.pipelineType }}
