@@ -304,9 +304,9 @@ jobs:
         env:
             PIPELINE: ${{ needs.main.outputs.pipelineYaml }}        
         run: |
-            image=$(echo "$PIPELINE" | yq eval '.build.image // ""')
-            echo "image=$image" >> GITHUB_ENV
-            echo "image: $image"
+            IMAGE=$(echo "$PIPELINE" | yq eval '.build.image // ""')
+            echo "IMAGE=$IMAGE" >> GITHUB_OUTPUT
+            echo "IMAGE: $IMAGE"
             
             steps=$(echo "$PIPELINE" | yq eval '.build.steps // ""')
             echo "steps=$steps" >> GITHUB_ENV
@@ -315,10 +315,11 @@ jobs:
       - name: Run Docker Build
         id: docker-run
         env: 
-          IMAGE: ${{ steps.build-image.outputs.image }}
+          IMAGE: ${{ steps.build-image.outputs.IMAGE }}
           STEPS: ${{ steps.build-image.outputs.steps }}
         run: | 
             echo "$STEPS"
+            echo "$IMAGE"
 
           # echo "Validating the branch for environments:"
 
