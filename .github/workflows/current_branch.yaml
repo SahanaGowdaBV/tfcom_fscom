@@ -305,17 +305,17 @@ jobs:
             PIPELINE: ${{ needs.main.outputs.pipelineYaml }}        
         run: |
             image=$(echo "$PIPELINE" | yq eval '.build.image // ""')
-            echo "image=$image" >> GITHUB_OUTPUT
+            echo "image=$image" >> $GITHUB_ENV
             echo "image: $image"
             
             steps=$(echo "$PIPELINE" | yq eval '.build.steps // ""')
-            echo "steps=$steps" >> GITHUB_OUTPUT
+            echo "steps=$steps" >> $GITHUB_ENV
             echo "steps: $steps"
 
       - name: Run Docker Build
-        env: 
-          IMAGE: ${{ steps.build-image.outputs.image }}
-          STEPS: ${{ steps.build-image.outputs.steps }}
+        env:
+          IMAGE: ${{ env.IMAGE }}
+          STEPS: ${{ env.STEPS }}
         run: | 
             echo "$STEPS"
 
