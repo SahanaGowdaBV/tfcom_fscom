@@ -305,7 +305,7 @@ jobs:
             echo "Environment: $key, Branch in YAML: $branch, Current Branch: $CURRENT_BRANCH"
 
             # Check if the current branch matches the environment branch
-            if [ "${branch}" != "null" ] && [[ "${CURRENT_BRANCH}" == *"${branch}"* ]]; then
+            if [ "${branch}" != "null" ] && [[ "${CURRENT_BRANCH}" =~ ^${branch}$ ]]; then
             # if [ "${CURRENT_BRANCH}" = "${branch}" ]; then
               echo "Current branch matches for environment: $key"
             fi
