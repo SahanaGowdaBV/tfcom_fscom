@@ -322,7 +322,7 @@ jobs:
           # STEPS: ${{ steps.build-image.outputs.steps }}
         run: | 
             steps=$(echo "$PIPELINE" | yq eval '.build.steps // "" | .[]' - )
-            echo "steps=$steps" >> GITHUB_ENV
+            # echo "steps=$steps" >> GITHUB_ENV
             # echo "::set-env name=STEPS::$steps"  # Set STEPS as environment variable
   
             for step in $steps; do  # Corrected variable name and syntax
