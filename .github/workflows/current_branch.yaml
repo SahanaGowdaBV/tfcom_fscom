@@ -322,13 +322,16 @@ jobs:
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
           # STEPS: ${{ steps.build-image.outputs.steps }}
         run: | 
-            steps=$(echo "$PIPELINE" | yq eval '.build.steps // "" | .[]' - )
-            # echo "steps=$steps" >> GITHUB_ENV
-            # echo "::set-env name=STEPS::$steps"  # Set STEPS as environment variable
-  
-            for step in $steps; do  # Corrected variable name and syntax
-              echo "$step"
-            done
+          steps=$(echo "$PIPELINE" | yq eval '.build.steps // []' -)
+          
+          echo "Pipeline: $PIPELINE"
+          echo "Extracted Steps: $steps"
+          
+          # Use while read to preserve each step as a single unit
+          echo "$steps" | while IFS= read -r step; do
+            echo "Executing Step: $step"
+            # Add your logic here for executing each step
+          done
 
           # echo "Validating the branch for environments:"
 
