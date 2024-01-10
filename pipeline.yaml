@@ -2,6 +2,8 @@ build:
   image: openjdk:8u151-jdk-alpine
   steps:
     - ./gradlew clean build -x test --stacktrace
+    - ./gradlew clean build -x test --stacktrace -1
+    - ./gradlew clean build -x test --stacktrace -2
 
 containerBuild:
   imageName: test
