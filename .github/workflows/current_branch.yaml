@@ -319,6 +319,7 @@ jobs:
         id: docker-run
         env: 
           IMAGE: ${{ steps.build-image.outputs.IMAGE }}
+          PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
           # STEPS: ${{ steps.build-image.outputs.steps }}
         run: | 
             steps=$(echo "$PIPELINE" | yq eval '.build.steps // "" | .[]' - )
