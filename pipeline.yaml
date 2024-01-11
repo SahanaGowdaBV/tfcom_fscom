@@ -36,7 +36,8 @@ environments:
     ingressDomains:
       - helloworld-dev1.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
   dev-cn:
-    branch: release/.*
+    # branch: release/.*
+    branch: dpe-gha
     cluster: tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
     env:
       - name: NODE_ENV_ARG
@@ -47,7 +48,7 @@ environments:
       to: prod-1
       mergeTo: master      
   qa-ap:
-    branch: release/.*
+    # branch: release/.*
     cluster: tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
     env:
       - name: NODE_ENV_ARG
