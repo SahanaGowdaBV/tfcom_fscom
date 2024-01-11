@@ -17,19 +17,11 @@ jobs:
           java-version: '11'
 
       - name: Retrieve Dynamic Secrets
+        id: secrets
         run: |
-          # Use a script or command to fetch dynamic secrets
-          # Store the secrets in a file (e.g., dynamic_secrets.txt)
-          echo "SECRET_ONE=value_one" > dynamic_secrets.txt
-          echo "SECRET_TWO=value_two" >> dynamic_secrets.txt
+          echo "SECRET_ONE=value_one" >> $GITHUB_ENV
+          echo "SECRET_TWO=value_two" >> $GITHUB_ENV
           
-      - name: Set Environment Variables
-        run: |
-          # Read the dynamic secrets file and set them as environment variables
-          while IFS= read -r line; do
-            export "$line"
-          done < dynamic_secrets.txt
-
   use-secrets:
     needs: retrieve-secrets
     runs-on: ubuntu-latest
@@ -37,8 +29,9 @@ jobs:
     steps:
       - name: Use Retrieved Secrets
         run: |
-          # Accessing retrieved secrets in another job
+          # Accessing retrieved secrets from environment variables
           echo "SECRET_ONE: $SECRET_ONE"
           echo "SECRET_TWO: $SECRET_TWO"
+
 
 
