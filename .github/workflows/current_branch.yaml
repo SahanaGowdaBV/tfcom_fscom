@@ -333,18 +333,18 @@ jobs:
           
           # Loop through each environment
           for env in $envs; do
-            echo "Processing environment: $env"
-            buildarg=''
-  
-            # Loop through buildEnv in pipeline.yaml for the current environment
-            for name in $(echo "$PIPELINE" | yq eval '.environments.${env}.buildEnv[].name'); do
-              value=$(echo "$PIPELINE" | yq eval '.environments.qa.buildEnv[] | select(.name == \"$name\") | .value' -)
-              
-              # Append the build argument in the name=value format
-              buildarg="${buildarg} --build-arg ${name}=${value}"
-            done
-  
-            echo "Build Arguments for $env: $buildarg"
+              echo "Processing environment: $env"
+              buildarg=''
+          
+              # Loop through buildEnv in pipeline.yaml for the current environment
+              for name in $(echo "$PIPELINE" | yq eval ".environments.${env}.buildEnv[].name" -); do
+                  value=$(echo "$PIPELINE" | yq eval ".environments.${env}.buildEnv[] | select(.name == \"${name}\") | .value" -)
+          
+                  # Append the build argument in the name=value format
+                  buildarg="${buildarg} --build-arg ${name}=${value}"
+              done
+          
+              echo "Build Arguments for $env: $buildarg"
           done
 
 
