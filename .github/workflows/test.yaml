@@ -10,22 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Git repository
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '11'
-
       - name: Determine Secret Names
         id: determine-secrets
         run: |
-          # Replace this logic with your actual code to determine secret names
           echo "::set-output name=SECRET_ONE_KEY::actual_secret_one"
           echo "::set-output name=SECRET_TWO_KEY::actual_secret_two"
 
       - name: Retrieve Actual Secrets
         run: |
-          # Retrieve actual secrets using the determined keys
           echo "SECRET_ONE=${{ secrets.SECRET_ONE_KEY }}" >> $GITHUB_ENV
           echo "SECRET_TWO=${{ secrets.SECRET_TWO_KEY }}" >> $GITHUB_ENV
 
