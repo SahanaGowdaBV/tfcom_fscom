@@ -1,9 +1,9 @@
-name: Dynamic Secrets Workflow
+# name: Dynamic Secrets Workflow
 
-on:
-  push:
-    branches:
-      - release/2024.01-1.0
+# on:
+#   push:
+#     branches:
+#       - release/2024.01-1.0
 
 jobs:
   retrieve-secrets:
