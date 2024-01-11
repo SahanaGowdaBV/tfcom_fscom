@@ -333,6 +333,12 @@ jobs:
           
           # Loop through each environment
           for env in $envs; do
+              namespace=$(echo "$PIPELINE" | yq eval '.deployment.namespace // []' -)
+              imageName=$(echo "$PIPELINE" | yq eval '.containerBuild.imageName // []' -)
+              regiName= "techops-docker-prod.ha-us.dso.thermofisher.net"
+
+              imageNameWithTag = "${namespace}/${envKey}/${imageName}:${{ github.sha }}"
+              echo "Image Name with Tag: $imageNameWithTag"
               echo "Processing environment: $env"
               buildarg=''
           
