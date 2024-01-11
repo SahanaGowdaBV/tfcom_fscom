@@ -340,14 +340,6 @@ jobs:
             for name in $(echo "$PIPELINE" | yq eval '.environments.${env}.buildEnv[].name'); do
               value=$(echo "$PIPELINE" | yq eval '.environments.qa.buildEnv[] | select(.name == \"$name\") | .value' -)
               
-              # # If the value starts with INJECT, use the secret from repository secrets
-              # if [[ "$value" == "INJECT"* ]]; then
-              #   secret_name="${value//_/-}"  # Replace _ with - to match the secret naming convention
-              #   export SECRET_VALUE="${{ secrets.${secret_name} }}"
-              # else
-              #   export SECRET_VALUE="${value}"
-              # fi
-            
               # Append the build argument in the name=value format
               buildarg="${buildarg} --build-arg ${name}=${value}"
             done
