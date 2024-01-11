@@ -3,7 +3,7 @@ name: Dynamic Secrets Workflow
 on:
   push:
     branches:
-      - main
+      - release/2024.01-1.0
 
 jobs:
   retrieve-secrets:
