@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  access-secrets:
+  retrieve-secrets:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,27 +16,22 @@ jobs:
           distribution: 'adopt'
           java-version: '11'
 
-      - name: Retrieve Repository Secrets
-        id: get-secrets
+      - name: Retrieve Dynamic Secrets
         run: |
-          SECRETS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                      "https://api.github.com/repos/${{ github.repository }}/actions/secrets")
-
-          # Extract secret names and values
-          SECRET_NAMES=($(echo "$SECRETS" | jq -r '.secrets[].name'))
-          for name in "${SECRET_NAMES[@]}"; do
-            value=$(echo "$SECRETS" | jq -r ".secrets[] | select(.name == \"$name\") | .value")
-            echo "::add-mask::$value" # Masking the secret value (optional)
-            echo "export $name=\"$value\"" >> $GITHUB_ENV
-          done
-
-      - name: Display Retrieved Secrets
+          # Use a script or command to fetch dynamic secrets
+          # Store the secrets in a file (e.g., dynamic_secrets.txt)
+          echo "SECRET_ONE=value_one" > dynamic_secrets.txt
+          echo "SECRET_TWO=value_two" >> dynamic_secrets.txt
+          
+      - name: Set Environment Variables
         run: |
-          # Displaying retrieved secrets (optional, remove in production)
-          env | grep -E "^SECRET_"
+          # Read the dynamic secrets file and set them as environment variables
+          while IFS= read -r line; do
+            export "$line"
+          done < dynamic_secrets.txt
 
   use-secrets:
-    needs: access-secrets
+    needs: retrieve-secrets
     runs-on: ubuntu-latest
 
     steps:
@@ -45,4 +40,5 @@ jobs:
           # Accessing retrieved secrets in another job
           echo "SECRET_ONE: $SECRET_ONE"
           echo "SECRET_TWO: $SECRET_TWO"
+
 
