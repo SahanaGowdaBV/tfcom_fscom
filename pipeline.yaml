@@ -24,6 +24,60 @@ deployment:
   ###startupSeconds: 180
 
 environments:
+  qa:
+    branch: staging
+    buildEnv:
+      - name: MAGENTO_DATABASE_HOST_ARG
+        value: INJECT_MAGENTO_DATABASE_HOST_QA
+      - name: MAGENTO_DATABASE_PORT_NUMBER_ARG
+        value: 3306
+      - name: MAGENTO_DATABASE_NAME_ARG
+        value: INJECT_MAGENTO_DATABASE_NAME_QA
+      - name: MAGENTO_DATABASE_USER_ARG
+        value: INJECT_MAGENTO_DATABASE_USER_QA
+      - name: MAGENTO_DATABASE_PASSWORD_ARG
+        value: INJECT_MAGENTO_DATABASE_PASSWORD_QA
+      - name: MAGENTO_ELASTICSEARCH_HOST_ARG
+        value: INJECT_MAGENTO_ELASTICSEARCH_HOST_QA
+      - name: MAGENTO_ELASTICSEARCH_PORT_ARG
+        value: 9200        
+      - name: MAGENTO_REDIS_HOST_ARG
+        value: INJECT_MAGENTO_REDIS_HOST_QA
+      - name: REDIS_PASS_ARG
+        value: INJECT_REDIS_PASS_QA
+      - name: MAGENTO_MODE_ARG
+        value: developer
+    promotion:
+      to: prod
+      mergeTo: master
+    cluster: tfcom-cluster-ap-qa1.cloudqa.apac.thermofisher.net
+    helmValueFile: ./configs/staging-values.yaml
+ 
+  prod:
+ 
+    cluster: tfcom-cluster-ap-prod.cloudprod.apac.thermofisher.net
+    helmValueFile: ./configs/prod-values.yaml
+    buildEnv:
+      - name: MAGENTO_DATABASE_HOST_ARG
+        value: INJECT_MAGENTO_DATABASE_HOST_PROD
+      - name: MAGENTO_DATABASE_PORT_NUMBER_ARG
+        value: 3306
+      - name: MAGENTO_DATABASE_NAME_ARG
+        value: INJECT_MAGENTO_DATABASE_NAME_PROD
+      - name: MAGENTO_DATABASE_USER_ARG
+        value: INJECT_MAGENTO_DATABASE_USER_PROD
+      - name: MAGENTO_DATABASE_PASSWORD_ARG
+        value: INJECT_MAGENTO_DATABASE_PASSWORD_PROD
+      - name: MAGENTO_ELASTICSEARCH_HOST_ARG
+        value: INJECT_MAGENTO_ELASTICSEARCH_HOST_PROD
+      - name: MAGENTO_ELASTICSEARCH_PORT_ARG
+        value: 9200        
+      - name: MAGENTO_REDIS_HOST_ARG
+        value: INJECT_MAGENTO_REDIS_HOST_PROD
+      - name: REDIS_PASS_ARG
+        value: INJECT_REDIS_PASS_PROD
+      - name: MAGENTO_MODE_ARG
+        value: developer
   dev-ap:
     branch: gihubaction
     cluster: tfcom-cluster
