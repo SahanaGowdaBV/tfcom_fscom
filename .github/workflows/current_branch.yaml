@@ -313,7 +313,7 @@ jobs:
               echo "No match found. Exiting the job."
               exit 1  # Use a non-zero status code to indicate failure
             fi
-
+           done
       - name: fetch image
         if: steps.validate-branch.outputs.found_match == 'true'
         id: image
