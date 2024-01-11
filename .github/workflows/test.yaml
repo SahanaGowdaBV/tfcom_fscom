@@ -1,0 +1,31 @@
+name: secrets
+on:
+  push:
+    branches: 
+      release/2024.01-1.0
+        
+  workflow_dispatch:
+
+jobs:
+  Build:
+    runs-on: [ self-hosted, dpe-devops-runner-dind-custom ] 
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      env_vars: ${{ secrets.env_vars }}
+    steps:      
+      - name: Decode credentials as environment variables
+        run: |
+          for i in $env_vars; do
+            i=$(echo $i | sed 's/=.*//g')=$(echo ${i#*=} | base64 -di | base64 -di)
+            echo ::add-mask::${i#*=}
+            printf '%s\n' $i >> $GITHUB_ENV
+          done   
+
+      - name: Validate credentials
+        run: |
+          # Secrets are now available as masked environment variable.
+          echo $CREDENTIAL1 # or ${{ env.CREDENTIAL1 }}
+          echo $CREDENTIAL2 # or ${{ env.CREDENTIAL2 }}
+          # echo $INJECT_NODE_ENV_ARG_VALUE # or ${{ env.INJECT_NODE_ENV_ARG_VALUE }}
