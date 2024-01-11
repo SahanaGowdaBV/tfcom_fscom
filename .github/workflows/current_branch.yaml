@@ -291,7 +291,7 @@ jobs:
               echo "Configuration error: missing Deployment/name " >&2
               exit 1
             fi
-
+            
       - name: Validate the branch
         id: validate-branch
         env:
@@ -306,14 +306,34 @@ jobs:
             echo "Environment: $key, Branch in YAML: $branch, Current Branch: $CURRENT_BRANCH"
             # Check if the current branch matches the environment branch
             if [ "${branch}" != "null" ] && [[ "${CURRENT_BRANCH}" == ${branch%%/*}* ]]; then
+            # if [ "${branch}" != "null" ] && [[ "${CURRENT_BRANCH}" == ${branch}$ ]]; then
+            # if [ "${CURRENT_BRANCH}" = "${branch}" ]; then
               echo "Current branch matches for environment: $key"
-              found_match=true
-            else
-              # Exit the job early if found_match is not true
-              echo "No match found. Exiting the job."
-              exit 1  # Use a non-zero status code to indicate failure
             fi
-           done
+          done 
+
+      # - name: Validate the branch
+      #   id: validate-branch
+      #   env:
+      #     CURRENT_BRANCH: ${{ needs.main.outputs.branch }}
+      #     PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
+      #   run: |
+      #     echo "Validating the branch for environments:"
+      #     # Loop through environments
+      #     keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
+      #     for key in $keys; do
+      #       branch=$(echo "$PIPELINE" | yq eval ".environments.$key.branch" -)
+      #       echo "Environment: $key, Branch in YAML: $branch, Current Branch: $CURRENT_BRANCH"
+      #       # Check if the current branch matches the environment branch
+      #       if [ "${branch}" != "null" ] && [[ "${CURRENT_BRANCH}" == ${branch%%/*}* ]]; then
+      #         echo "Current branch matches for environment: $key"
+      #         found_match=true
+      #       else
+      #         # Exit the job early if found_match is not true
+      #         echo "No match found. Exiting the job."
+      #         exit 1  # Use a non-zero status code to indicate failure
+      #       fi
+      #      done
       - name: fetch image
         if: steps.validate-branch.outputs.found_match == 'true'
         id: image
