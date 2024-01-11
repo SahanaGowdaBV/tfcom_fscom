@@ -3,7 +3,7 @@ name: Dynamic Secrets Workflow
 on:
   push:
     branches:
-      - release/2024.01-1.0
+      - main
 
 jobs:
   retrieve-secrets:
@@ -17,16 +17,18 @@ jobs:
           java-version: '11'
 
       - name: Determine Secret Names
+        id: determine-secrets
         run: |
-          # Logic to determine the actual secret names during the workflow run
-          export SECRET_ONE_KEY="actual_secret_one"
-          export SECRET_TWO_KEY="actual_secret_two"
+          # Replace this logic with your actual code to determine secret names
+          echo "::set-output name=SECRET_ONE_KEY::actual_secret_one"
+          echo "::set-output name=SECRET_TWO_KEY::actual_secret_two"
 
       - name: Retrieve Actual Secrets
         run: |
+          # Retrieve actual secrets using the determined keys
           echo "SECRET_ONE=${{ secrets.SECRET_ONE_KEY }}" >> $GITHUB_ENV
           echo "SECRET_TWO=${{ secrets.SECRET_TWO_KEY }}" >> $GITHUB_ENV
-          
+
   use-secrets:
     needs: retrieve-secrets
     runs-on: ubuntu-latest
@@ -37,6 +39,7 @@ jobs:
           # Accessing retrieved secrets from environment variables
           echo "SECRET_ONE: $SECRET_ONE"
           echo "SECRET_TWO: $SECRET_TWO"
+
 
 
 
