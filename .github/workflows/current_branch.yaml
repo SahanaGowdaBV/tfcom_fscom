@@ -321,6 +321,38 @@ jobs:
             exit 1  # Use a non-zero status code to indicate failure
           fi
 
+      - name: Set Build Arguments
+        env:
+          CURRENT_BRANCH: ${{ needs.main.outputs.branch }}
+          PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
+        run: |
+          echo "Setting build arguments from pipeline.yaml"
+          
+          # Get a list of all environments from pipeline.yaml
+          envs=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]')
+          
+          # Loop through each environment
+          for env in $envs; do
+            echo "Processing environment: $env"
+            buildarg=''
+  
+            # Loop through buildEnv in pipeline.yaml for the current environment
+            for name in $(echo "$PIPELINE" | yq eval '.environments.${env}.buildEnv[].name'); do
+              value=$(echo "$PIPELINE" | yq eval '.environments.qa.buildEnv[] | select(.name == \"$name\") | .value' -)
+              
+              # If the value starts with INJECT, use the secret from repository secrets
+              if [[ "$value" == "INJECT"* ]]; then
+                value="${{ secrets.${value} }}"
+              fi
+            
+              # Append the build argument in the name=value format
+              buildarg="${buildarg} --build-arg ${name}=${value}"
+            done
+  
+            echo "Build Arguments for $env: $buildarg"
+          done
+
+
       # - name: Validate the branch
       #   id: validate-branch
       #   env:
