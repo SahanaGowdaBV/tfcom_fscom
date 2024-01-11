@@ -1,31 +1,48 @@
-name: secrets
+name: Dynamic Secrets Workflow
+
 on:
   push:
-    branches: 
-      release/2024.01-1.0
-        
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
-  Build:
-    runs-on: ubuntu-latest 
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      env_vars: ${{ secrets.env_vars }}
-    steps:      
-      - name: Decode credentials as environment variables
-        run: |
-          for i in $env_vars; do
-            i=$(echo $i | sed 's/=.*//g')=$(echo ${i#*=} | base64 -di | base64 -di)
-            echo ::add-mask::${i#*=}
-            printf '%s\n' $i >> $GITHUB_ENV
-          done   
+  access-secrets:
+    runs-on: ubuntu-latest
 
-      - name: Validate credentials
+    steps:
+      - name: Set up Git repository
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
+      - name: Retrieve Repository Secrets
+        id: get-secrets
         run: |
-          # Secrets are now available as masked environment variable.
-          echo $CREDENTIAL1 # or ${{ env.CREDENTIAL1 }}
-          echo $CREDENTIAL2 # or ${{ env.CREDENTIAL2 }}
-          # echo $INJECT_NODE_ENV_ARG_VALUE # or ${{ env.INJECT_NODE_ENV_ARG_VALUE }}
+          SECRETS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                      "https://api.github.com/repos/${{ github.repository }}/actions/secrets")
+
+          # Extract secret names and values
+          SECRET_NAMES=($(echo "$SECRETS" | jq -r '.secrets[].name'))
+          for name in "${SECRET_NAMES[@]}"; do
+            value=$(echo "$SECRETS" | jq -r ".secrets[] | select(.name == \"$name\") | .value")
+            echo "::add-mask::$value" # Masking the secret value (optional)
+            echo "export $name=\"$value\"" >> $GITHUB_ENV
+          done
+
+      - name: Display Retrieved Secrets
+        run: |
+          # Displaying retrieved secrets (optional, remove in production)
+          env | grep -E "^SECRET_"
+
+  use-secrets:
+    needs: access-secrets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Use Retrieved Secrets
+        run: |
+          # Accessing retrieved secrets in another job
+          echo "SECRET_ONE: $SECRET_ONE"
+          echo "SECRET_TWO: $SECRET_TWO"
+
