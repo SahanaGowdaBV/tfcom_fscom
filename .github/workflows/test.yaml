@@ -8,7 +8,7 @@ on:
 
 jobs:
   Build:
-    runs-on: [ self-hosted, dpe-devops-runner-dind-custom ] 
+    runs-on: ubuntu-latest 
     permissions:
       id-token: write
       contents: read
