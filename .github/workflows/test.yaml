@@ -1,9 +1,9 @@
 name: Print Current Branch
 
 on:
-  push:
-    branches: 
-      release/2024.01-1.0
+  # push:
+  #   branches: 
+  #     release/2024.01-1.0
   workflow_dispatch:
 
 jobs:
@@ -13,7 +13,38 @@ jobs:
       branch: ${{ steps.current_branch.outputs.BRANCH }}
       pipelineYaml: ${{ steps.read_yaml.outputs.pipelineYaml }}
 
-    steps:  
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Extract branch name
+        shell: bash
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo "BRANCH=$branch_name" | tee -a $GITHUB_OUTPUT
+          echo "branch: $branch_name"
+        id: current_branch
+
+      - name: Check for Existing Tag
+        shell: bash
+        env: 
+          BRANCH: ${{ steps.current_branch.outputs.branch }}
+        run: |
+          tag=$(echo "$BRANCH" | grep -oE "[0-9]{4}[.-][0-9]{1,2}[.-][0-9]{1,2}")
+          echo "tag=v$tag"
+          echo "tag: $tag"
+          if [ -n "$tag" ]; then
+            echo "Checking for existing tag: $tag"
+            if git ls-remote --tags origin | grep -q "$tag"; then
+              echo "Tag $tag already exists in repo! This branch has already been released. Version number on branch needs to be incremented."
+              exit 1
+            else
+              echo "No existing tag found: $tag"
+            fi
+          else
+            echo "Not checking for tag, no tag could be parsed from the branch name"
+          fi
+
       - name: Read Pipeline YAML
         id: read_yaml
         run: |
@@ -25,12 +56,62 @@ jobs:
           echo "::set-output name=pipelineYaml::$pipelineYaml"
           # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_OUTPUT 
 
+
+  Build:
+    # if: ${{ github.job == build }}
+    needs: main
+    runs-on: ubuntu-latest
+    outputs: 
+      image: ${{ steps.build-image.outputs.IMAGE }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # - name: Install yq
+      #   run: |
+      #     sudo wget https://github.com/mikefarah/yq/releases/download/v4.12.0/yq_linux_amd64 -O /usr/bin/yq
+      #     sudo chmod +x /usr/bin/yq
+
+      - name: Determine Pipeline Type
+        env:
+          PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
+        id: set-pipeline
+        run: |
+          # deploymentType=$(echo "$PIPELINE" | grep -oP 'type: \K\w+' | head -n1)
+          # deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
+
+
+          while IFS= read -r deploymentType; do
+            case $deploymentType in
+              mobility)
+                pipelineType="mobility"
+                ;;
+              K8sClassic)
+                pipelineType="K8sClassic"
+                ;;
+              S3)
+                pipelineType="S3"
+                ;;
+              helm)
+                pipelineType="helm"
+                ;;
+              *)
+                pipelineType="K8sClassic"
+                ;;
+            esac
+      
+            echo "pipelineType: $pipelineType"
+            echo "pipelineType=$pipelineType" >> $GITHUB_OUTPUT
+          # done < <(echo "$PIPELINE" | grep -oP 'type: \K\w+')
+          done < <(echo "$PIPELINE" | yq eval '.deployment.type' -)
+
       - name: Run deployment 
         shell: bash 
         # if: ${{ env.pipelinetype == 'K8sClassic' || env.pipelinetype == 'mobility' }}
         id: deploy
         env:
-          # PIPELINE_TYPE: ${{ steps.set-pipeline.outputs.pipelineType }}
+          PIPELINE_TYPE: ${{ steps.set-pipeline.outputs.pipelineType }}
           PIPELINE: ${{ steps.read_yaml.outputs.pipelineYaml }}
         run: |
             echo "Checking for environment in pipeline.yaml" 
