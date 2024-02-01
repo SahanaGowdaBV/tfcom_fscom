@@ -1,36 +1,53 @@
-# name: Dynamic Secrets Workflow
+name: Print Current Branch
 
-# on:
-#   push:
-#     branches:
-#       - release/2024.01-1.0
+on:
+  push:
+    branches: 
+      release/2024.01-1.0
+  workflow_dispatch:
 
 jobs:
-  retrieve-secrets:
+  main:
     runs-on: ubuntu-latest
+    outputs: 
+      branch: ${{ steps.current_branch.outputs.BRANCH }}
+      pipelineYaml: ${{ steps.read_yaml.outputs.pipelineYaml }}
 
-    steps:
-      - name: Determine Secret Names
-        id: determine-secrets
+    steps:  
+      - name: Read Pipeline YAML
+        id: read_yaml
         run: |
-          echo "::set-output name=SECRET_ONE_KEY::actual_secret_one"
-          echo "::set-output name=SECRET_TWO_KEY::actual_secret_two"
+          pipelineYaml=$(cat pipeline.yaml)
+          pipelineYaml="${pipelineYaml//'%'/'%25'}"
+          pipelineYaml="${pipelineYaml//$'\n'/'%0A'}"
+          pipelineYaml="${pipelineYaml//$'\r'/'%0D'}"
+          # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_ENV
+          echo "::set-output name=pipelineYaml::$pipelineYaml"
+          # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_OUTPUT 
 
-      - name: Retrieve Actual Secrets
+      - name: Run deployment 
+        shell: bash 
+        # if: ${{ env.pipelinetype == 'K8sClassic' || env.pipelinetype == 'mobility' }}
+        id: deploy
+        env:
+          # PIPELINE_TYPE: ${{ steps.set-pipeline.outputs.pipelineType }}
+          PIPELINE: ${{ steps.read_yaml.outputs.pipelineYaml }}
         run: |
-          echo "SECRET_ONE=${{ secrets.SECRET_ONE_KEY }}" >> $GITHUB_ENV
-          echo "SECRET_TWO=${{ secrets.SECRET_TWO_KEY }}" >> $GITHUB_ENV
-
-  use-secrets:
-    needs: retrieve-secrets
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Use Retrieved Secrets
-        run: |
-          # Accessing retrieved secrets from environment variables
-          echo "SECRET_ONE: $SECRET_ONE"
-          echo "SECRET_TWO: $SECRET_TWO"
+            echo "Checking for environment in pipeline.yaml" 
+            # Checking for environment cluster
+            keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
+            for key in $keys; do
+              source "$HOME/.sdkman/bin/sdkman-init.sh"
+              echo "run groovy script"
+              echo "pwd=$(pwd)"
+              ls -al
+              echo $PATH
+              ls ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src/com/tfs/k8s/
+              echo "KEYS=$key" >> $GITHUB_ENV
+              echo "KEYS: $key"
+              # # groovy -cp ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src/com/tfs/k8s/Deploy.groovy $pipelineType
+              # groovy -cp ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src/com/tfs/k8s/deploy.groovy
+            done
 
 
 
