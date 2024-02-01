@@ -117,7 +117,23 @@ jobs:
           for key in $keys; do
             echo "KEYS=$key" >> $GITHUB_ENV
             echo "KEYS: $key"
-          done   
+          done  
+
+      - name: Validate the branch
+        id: env-list
+        env:
+          CURRENT_BRANCH: ${{ needs.main.outputs.branch }}
+          PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
+        run: |
+          # Loop through environments and concatenate into a space-separated list
+          keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
+          env_list=""
+          for key in $keys; do
+            echo "KEYS=$key" >> $GITHUB_ENV
+            env_list="$env_list $key"
+          done
+          echo "ENV_LIST=${env_list}" >> $GITHUB_ENV
+          echo "ENV_LIST: ${env_list}"
 
 
 
