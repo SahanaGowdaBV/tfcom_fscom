@@ -106,30 +106,18 @@ jobs:
           # done < <(echo "$PIPELINE" | grep -oP 'type: \K\w+')
           done < <(echo "$PIPELINE" | yq eval '.deployment.type' -)
 
-      - name: Run deployment 
-        shell: bash 
-        # if: ${{ env.pipelinetype == 'K8sClassic' || env.pipelinetype == 'mobility' }}
-        id: deploy
+      - name: Validate the branch
+        id: validate-branch
         env:
-          PIPELINE_TYPE: ${{ steps.set-pipeline.outputs.pipelineType }}
-          PIPELINE: ${{ steps.read_yaml.outputs.pipelineYaml }}
+          CURRENT_BRANCH: ${{ needs.main.outputs.branch }}
+          PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         run: |
-            echo "Checking for environment in pipeline.yaml" 
-            # Checking for environment cluster
-            keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
-            for key in $keys; do
-              source "$HOME/.sdkman/bin/sdkman-init.sh"
-              echo "run groovy script"
-              echo "pwd=$(pwd)"
-              ls -al
-              echo $PATH
-              ls ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src/com/tfs/k8s/
-              echo "KEYS=$key" >> $GITHUB_ENV
-              echo "KEYS: $key"
-              # # groovy -cp ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src/com/tfs/k8s/Deploy.groovy $pipelineType
-              # groovy -cp ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src/com/tfs/k8s/deploy.groovy
-            done
-
+          # Loop through environments
+          keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
+          for key in $keys; do
+            echo "KEYS=$key" >> $GITHUB_ENV
+            echo "KEYS: $key"
+          done   
 
 
 
