@@ -135,6 +135,13 @@ jobs:
           echo "ENV_LIST=${env_list}" >> $GITHUB_ENV
           echo "ENV_LIST: ${env_list}"
 
+      - name: Use List in Next Step
+        env:
+          LIST: ${{ steps.validate-branch.outputs.ENV_LIST }}
+        run: |
+          # Retrieve the list from the environment variable
+          MY_LIST="${{ env.LIST }}"
+
 
 
 
