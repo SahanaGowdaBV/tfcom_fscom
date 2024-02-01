@@ -140,7 +140,7 @@ jobs:
           LIST: ${{ steps.validate-branch.outputs.ENV_LIST }}
         run: |
           # Retrieve the list from the environment variable
-          MY_LIST="${{ env.LIST }}"
+          echo "MY_LIST: ${{ env.LIST }}"
 
 
 
