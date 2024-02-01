@@ -129,8 +129,10 @@ jobs:
           keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
           env_list=""
           for key in $keys; do
-            echo "KEYS=$key" >> $GITHUB_ENV
-            env_list="$env_list $key"
+            if [[ ! $key =~ ^prod ]]; then
+              echo "KEYS=$key" >> $GITHUB_ENV
+              env_list="$env_list $key"
+            fi
           done
           echo "ENV_LIST=${env_list}" >> $GITHUB_ENV
           echo "ENV_LIST: ${env_list}"
