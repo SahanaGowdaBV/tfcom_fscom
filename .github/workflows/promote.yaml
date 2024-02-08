@@ -12,6 +12,7 @@ jobs:
     outputs: 
       branch: ${{ steps.current_branch.outputs.BRANCH }}
       pipelineYaml: ${{ steps.read_yaml.outputs.pipelineYaml }}
+      pipelinetype: ${{ steps.set-pipeline.outputs.pipelineType }}
 
     steps:
       - name: Checkout repository
@@ -35,6 +36,39 @@ jobs:
           # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_ENV
           echo "::set-output name=pipelineYaml::$pipelineYaml"
           # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_OUTPUT 
+
+      - name: Determine Pipeline Type
+        env:
+          PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
+        id: set-pipeline
+        run: |
+          # deploymentType=$(echo "$PIPELINE" | grep -oP 'type: \K\w+' | head -n1)
+          # deploymentType=$(echo "$PIPELINE" | yq eval '.deployment.type' -)
+
+
+          while IFS= read -r deploymentType; do
+            case $deploymentType in
+              mobility)
+                pipelineType="mobility"
+                ;;
+              K8sClassic)
+                pipelineType="K8sClassic"
+                ;;
+              S3)
+                pipelineType="S3"
+                ;;
+              helm)
+                pipelineType="helm"
+                ;;
+              *)
+                pipelineType="K8sClassic"
+                ;;
+            esac
+      
+            echo "pipelineType: $pipelineType"
+            echo "pipelineType=$pipelineType" >> $GITHUB_OUTPUT
+          # done < <(echo "$PIPELINE" | grep -oP 'type: \K\w+')
+          done < <(echo "$PIPELINE" | yq eval '.deployment.type' -)
 
 
   Build:
@@ -63,6 +97,7 @@ jobs:
         env:
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
           CURRENT_BRANCH: ${{ needs.main.outputs.branch }}
+          PIPELINE_TYPE: ${{ needs.main.outputs.pipelinetype }}
         run: |
           echo "current_branch: $current_branch"
           echo "Validating the branch for environments:"
@@ -91,9 +126,77 @@ jobs:
     
           # Extract the mergeTo and to values for each matched environment
           for env in "${matched_envs[@]}"; do
+            branch_name=$(echo "$PIPELINE" | yq eval ".environments.$env.branch" -)
             mergeTo=$(echo "$PIPELINE" | yq eval ".environments.$env.promotion.mergeTo" -)
             to=$(echo "$PIPELINE" | yq eval ".environments.$env.promotion.to" -)
       
             # Store or use the values as needed
             echo "For environment $env - mergeTo: $mergeTo, to: $to"
+
+            # Extract 'to' values and process them as needed
+            IFS=',' read -ra to_array <<< "$to"
+            for target_env in "${to_array[@]}"; do
+              echo "Target environment: $target_env"
+            done
           done
+            
+
+          #   echo "#!/bin/bash" > create_pr_script.sh
+          #   cat << EOF >> create_pr_script.sh 
+          #   # Extract input variables
+          #   ENV_BRANCH_NAME=$1
+          #   ENV_MERGE_TO=$2
+          #   ENV_TO=$3
+          #   RFC=$4
+            
+          #   # Check conditions and create pull request accordingly
+          #   if [[ -n "$RFC" && "$RFC" == *CHG* ]]; then
+          #     echo "Creating PR from \$ENV_BRANCH_NAME to \$ENV_MERGE_TO with RFC \$RFC"
+          #       curl -X POST \
+          #         -H "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \
+          #         -H "Accept: application/vnd.github.v3+json" \
+          #         -d "{\"title\":\"PR for $ENV_BRANCH_NAME\",\"body\":\"Pull request opened by GHA. Merging this PR will automatically promote these changes to $ENV_MERGE_TO. Change Request Number $RFC.\",\"head\":\"$ENV_BRANCH_NAME\",\"base\":\"$ENV_MERGE_TO\"}" \
+          #         https://api.github.com/repos/${{ github.repository }}/pulls
+          #   else
+          #     echo "Creating PR from \$ENV_BRANCH_NAME to \$ENV_MERGE_TO
+          #       curl -X POST \
+          #         -H "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \
+          #         -H "Accept: application/vnd.github.v3+json" \
+          #         -d "{\"title\":\"PR for $ENV_BRANCH_NAME\",\"body\":\"Pull request opened by GHA. Merging this PR will automatically promote these changes to $ENV_MERGE_TO.\",\"head\":\"$ENV_BRANCH_NAME\",\"base\":\"$ENV_MERGE_TO\"}" \
+          #         https://api.github.com/repos/${{ github.repository }}/pulls
+          #   fi
+          #   EOF
+          #   chmod +x create_pr_script.sh
+          #   # ./create_pr_script.sh "$ENV_BRANCH_NAME" "$ENV_MERGE_TO" "$ENV_TO" "$RFC"
+          #   if [[ "$branch_name" == "$mergeTo" ]]; then
+          #     echo "Trunk based deployment, not raising PR"
+          #     echo "trunk = true"
+          #   elif [[ "$branch_name" == release* ]]; then
+          #     # echo "Creating PR from $branch_name to $mergeTo" with $RFC
+          #     echo "::group::Creating PR from $branch_name to $mergeTo with $RFC"
+          #     ./create_pr_action.sh "$branch_name" "$mergeTo" "$to" "$RFC"
+          #     echo "::endgroup::"
+
+          #   elif [[ "$branch_name" == integration* ]]; then
+          #     echo "::group::Creating PR from $branch_name to $mergeTo"
+          #     ./create_pr_action.sh "$branch_name" "$mergeTo" "$to" "$RFC"
+          #     echo "::endgroup::"
+          #   else
+          #     echo "Branch name doesn't match the conditions for creating PRs."
+          #   fi
+          # if [[ env.pipelinetype == 'S3' ]] || [[ $container_build != 'true' ]]
+          #   source "$HOME/.sdkman/bin/sdkman-init.sh"
+          #   echo "run groovy script"
+          #   groovy -cp ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src/com/tfs/k8s/deploy.groovy
+          # elif 
+          #   promotionImageNameWithTag = 
+          #   deploymentImageNameWithTag = 
+            
+          #   echo "run copy"
+          #   docker buildx imagetools create -t ${regiName}/${promotionImageNameWithTag} ${regiName}/${deploymentImageNameWithTag} --progress plain
+          #   source "$HOME/.sdkman/bin/sdkman-init.sh"
+          #   echo "deploy"
+          #   groovy -cp ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src ${{ github.workspace }}/dpe-gha-workflows/titan_v2/src/com/tfs/k8s/deploy.groovy      
+            
+          # done
+
