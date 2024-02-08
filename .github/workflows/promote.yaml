@@ -1,0 +1,25 @@
+name: Promote
+
+on:
+  push:
+    branches: 
+      release/2024.01-1.0
+  workflow_dispatch:
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    outputs: 
+      branch: ${{ steps.current_branch.outputs.BRANCH }}
+      pipelineYaml: ${{ steps.read_yaml.outputs.pipelineYaml }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Extract branch name
+        shell: bash
+        run: |
+          keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[0]')
+          echo "keys: $keys"
+        id: current_branch
