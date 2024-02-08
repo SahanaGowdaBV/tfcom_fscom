@@ -137,6 +137,8 @@ jobs:
             IFS=',' read -ra to_array <<< "$to"
             for target_env in "${to_array[@]}"; do
               echo "Target environment: $target_env"
+              target_to=$(echo "$PIPELINE" | yq eval ".environments.$target_env.promotion.to" -)
+              echo "To value under $target_env: $target_to"
             done
           done
             
