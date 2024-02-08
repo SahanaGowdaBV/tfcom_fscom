@@ -2,224 +2,132 @@ build:
   image: openjdk:8u151-jdk-alpine
   steps:
     - ./gradlew clean build -x test --stacktrace
+    - ./gradlew clean build -x test --stacktrace -1
+    - ./gradlew clean build -x test --stacktrace -2
 
 containerBuild:
-  imageName: techops/techops-hello-world
+  imageName: test
 
-# arch:
-#   - linux/arm64
-#   - linux/amd64
-  
+ 
 deployment:
+  # type: helm
   name: techops-hello-world
   namespace: techops
   cpu: 100m
-  memory: 1Gi
+  memory: 2Gi
   replicas: 1
   containerPort: 9090
   healthCheckPath: /actuator/health 
   healthCheckPort: 9090
   ingressPath: /
   iamRole: techops
-  labels:
-    component: backend
-    sub_application: techops
-    stack: nodejs
-    part_of: techops
-    stack_version: 1.0
-    application_owner: nicolas
-    costcenter: 000.000
-    snow_support: DE.IT Ops - fishersci.com
-  #######startupSeconds: 180
+  ###startupSeconds: 180
 
 environments:
-  qa4:
-    branch: release/.*
-    cluster: fscom-cluster-eu-dev1.clouddev.eu.fishersci.net
-    env:
-      - name: NODE_ENV_ARG
-        value: production
-    ingressDomains:
-      - helloworld-dev1.fscom-cluster-eu-dev1.clouddev.eu.fishersci.net
-    promotion:
-      to: qa-us,qa-ap
-      mergeTo: release/multiPR    
-  qa-us:
-    cluster: fscom-cluster-na-dev1.clouddev.fishersci.net
-    env:
-      - name: NODE_ENV_ARG
-        value: production
-    ingressDomains:
-      - helloworld-dev2.fscom-cluster-na-dev1.clouddev.fishersci.net
-    promotion:
-      to: prod-us
-      mergeTo: main
-      
-  qa-ap:
-    cluster: fscom-cluster-na-dev1.clouddev.fishersci.net
+  qa:
+    branch: staging
     buildEnv:
-      - name: DOCKER_BUILDKIT
-        value: 1
+      - name: MAGENTO_DATABASE_HOST_ARG
+        value: INJECT_MAGENTO_DATABASE_HOST_QA
+      - name: MAGENTO_DATABASE_PORT_NUMBER_ARG
+        value: 3306
+      - name: MAGENTO_DATABASE_NAME_ARG
+        value: INJECT_MAGENTO_DATABASE_NAME_QA
+      - name: MAGENTO_DATABASE_USER_ARG
+        value: INJECT_MAGENTO_DATABASE_USER_QA
+      - name: MAGENTO_DATABASE_PASSWORD_ARG
+        value: INJECT_MAGENTO_DATABASE_PASSWORD_QA
+      - name: MAGENTO_ELASTICSEARCH_HOST_ARG
+        value: INJECT_MAGENTO_ELASTICSEARCH_HOST_QA
+      - name: MAGENTO_ELASTICSEARCH_PORT_ARG
+        value: 9200        
+      - name: MAGENTO_REDIS_HOST_ARG
+        value: INJECT_MAGENTO_REDIS_HOST_QA
+      - name: REDIS_PASS_ARG
+        value: INJECT_REDIS_PASS_QA
+      - name: MAGENTO_MODE_ARG
+        value: developer
+    promotion:
+      to: prod
+      mergeTo: master
+    cluster: tfcom-cluster-ap-qa1.cloudqa.apac.thermofisher.net
+    helmValueFile: ./configs/staging-values.yaml
+ 
+  prod:
+ 
+    cluster: tfcom-cluster-ap-prod.cloudprod.apac.thermofisher.net
+    helmValueFile: ./configs/prod-values.yaml
+    buildEnv:
+      - name: MAGENTO_DATABASE_HOST_ARG
+        value: INJECT_MAGENTO_DATABASE_HOST_PROD
+      - name: MAGENTO_DATABASE_PORT_NUMBER_ARG
+        value: 3306
+      - name: MAGENTO_DATABASE_NAME_ARG
+        value: INJECT_MAGENTO_DATABASE_NAME_PROD
+      - name: MAGENTO_DATABASE_USER_ARG
+        value: INJECT_MAGENTO_DATABASE_USER_PROD
+      - name: MAGENTO_DATABASE_PASSWORD_ARG
+        value: INJECT_MAGENTO_DATABASE_PASSWORD_PROD
+      - name: MAGENTO_ELASTICSEARCH_HOST_ARG
+        value: INJECT_MAGENTO_ELASTICSEARCH_HOST_PROD
+      - name: MAGENTO_ELASTICSEARCH_PORT_ARG
+        value: 9200        
+      - name: MAGENTO_REDIS_HOST_ARG
+        value: INJECT_MAGENTO_REDIS_HOST_PROD
+      - name: REDIS_PASS_ARG
+        value: INJECT_REDIS_PASS_PROD
+      - name: MAGENTO_MODE_ARG
+        value: developer
+  dev-ap:
+    branch: gihubaction
+    cluster: tfcom-cluster
+    promotion:
+      to: prod-2
+      mergeTo: master 
     env:
       - name: NODE_ENV_ARG
         value: production
     ingressDomains:
-      - helloworld-dev2.fscom-cluster-na-dev1.clouddev.fishersci.net
+      - helloworld-dev1.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
+  dev-cn:
+    branch: release/.*
+    cluster: tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
+    env:
+      - name: NODE_ENV_ARG
+        value: production
+    ingressDomains:
+      - helloworld-dev1.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
     promotion:
-      to: prod-ap,stage
-      mergeTo: main
-  ########################
-
-
-  prod-us:
-    
-    cluster: fscom-cluster-eu-qa1.cloudqa.eu.fishersci.net
+      to: prod-1
+      mergeTo: master      
+  qa-ap:
+    branch: release/.*
+    cluster: tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
+    env:
+      - name: NODE_ENV_ARG
+        value: production
     ingressDomains:
-      - helloworld-dev1.fscom-cluster-eu-qa1.cloudqa.eu.fishersci.net
-  
-  prod-ap:
-   
-    cluster: fscom-cluster-na-qa1.cloudqa.fishersci.net
+      - helloworld-dev2.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
+    promotion:
+      to: prod-2
+      mergeTo: master 
+
+  ############
+
+
+  prod-1:
+    
+    cluster: tfcom-cluster
+    buildEnv:
+      - name: NODE_ENV_ARG
+        value: production-1
     ingressDomains:
       - helloworld-dev1.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
-
-  stage:
-  
-    cluster: fscom-cluster-na-qa1.cloudqa.fishersci.net
+  prod-2:
+    
+    cluster: tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
+    env:
+      - name: NODE_ENV_ARG
+        value: production-2
     ingressDomains:
       - helloworld-dev1.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
-      
-
-# build:
-#   image: openjdk:8u151-jdk-alpine
-#   steps:
-#     - ./gradlew clean build -x test --stacktrace
-#     - ./gradlew clean build -x test --stacktrace -1
-#     - ./gradlew clean build -x test --stacktrace -2
-
-# containerBuild:
-#   imageName: test
-
- 
-# deployment:
-#   # type: helm
-#   name: techops-hello-world
-#   namespace: techops
-#   cpu: 100m
-#   memory: 2Gi
-#   replicas: 1
-#   containerPort: 9090
-#   healthCheckPath: /actuator/health 
-#   healthCheckPort: 9090
-#   ingressPath: /
-#   iamRole: techops
-#   ###startupSeconds: 180
-
-# environments:
-#   qa:
-#     branch: staging
-#     buildEnv:
-#       - name: MAGENTO_DATABASE_HOST_ARG
-#         value: INJECT_MAGENTO_DATABASE_HOST_QA
-#       - name: MAGENTO_DATABASE_PORT_NUMBER_ARG
-#         value: 3306
-#       - name: MAGENTO_DATABASE_NAME_ARG
-#         value: INJECT_MAGENTO_DATABASE_NAME_QA
-#       - name: MAGENTO_DATABASE_USER_ARG
-#         value: INJECT_MAGENTO_DATABASE_USER_QA
-#       - name: MAGENTO_DATABASE_PASSWORD_ARG
-#         value: INJECT_MAGENTO_DATABASE_PASSWORD_QA
-#       - name: MAGENTO_ELASTICSEARCH_HOST_ARG
-#         value: INJECT_MAGENTO_ELASTICSEARCH_HOST_QA
-#       - name: MAGENTO_ELASTICSEARCH_PORT_ARG
-#         value: 9200        
-#       - name: MAGENTO_REDIS_HOST_ARG
-#         value: INJECT_MAGENTO_REDIS_HOST_QA
-#       - name: REDIS_PASS_ARG
-#         value: INJECT_REDIS_PASS_QA
-#       - name: MAGENTO_MODE_ARG
-#         value: developer
-#     promotion:
-#       to: prod
-#       mergeTo: master
-#     cluster: tfcom-cluster-ap-qa1.cloudqa.apac.thermofisher.net
-#     helmValueFile: ./configs/staging-values.yaml
- 
-#   prod:
- 
-#     cluster: tfcom-cluster-ap-prod.cloudprod.apac.thermofisher.net
-#     helmValueFile: ./configs/prod-values.yaml
-#     buildEnv:
-#       - name: MAGENTO_DATABASE_HOST_ARG
-#         value: INJECT_MAGENTO_DATABASE_HOST_PROD
-#       - name: MAGENTO_DATABASE_PORT_NUMBER_ARG
-#         value: 3306
-#       - name: MAGENTO_DATABASE_NAME_ARG
-#         value: INJECT_MAGENTO_DATABASE_NAME_PROD
-#       - name: MAGENTO_DATABASE_USER_ARG
-#         value: INJECT_MAGENTO_DATABASE_USER_PROD
-#       - name: MAGENTO_DATABASE_PASSWORD_ARG
-#         value: INJECT_MAGENTO_DATABASE_PASSWORD_PROD
-#       - name: MAGENTO_ELASTICSEARCH_HOST_ARG
-#         value: INJECT_MAGENTO_ELASTICSEARCH_HOST_PROD
-#       - name: MAGENTO_ELASTICSEARCH_PORT_ARG
-#         value: 9200        
-#       - name: MAGENTO_REDIS_HOST_ARG
-#         value: INJECT_MAGENTO_REDIS_HOST_PROD
-#       - name: REDIS_PASS_ARG
-#         value: INJECT_REDIS_PASS_PROD
-#       - name: MAGENTO_MODE_ARG
-#         value: developer
-#   dev-ap:
-#     branch: gihubaction
-#     cluster: tfcom-cluster
-#     promotion:
-#       to: prod-2
-#       mergeTo: master 
-#     env:
-#       - name: NODE_ENV_ARG
-#         value: production
-#     ingressDomains:
-#       - helloworld-dev1.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
-#   dev-cn:
-#     branch: release/.*
-#     cluster: tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
-#     env:
-#       - name: NODE_ENV_ARG
-#         value: production
-#     ingressDomains:
-#       - helloworld-dev1.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
-#     promotion:
-#       to: prod-1
-#       mergeTo: master      
-#   qa-ap:
-#     branch: release/.*
-#     cluster: tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
-#     env:
-#       - name: NODE_ENV_ARG
-#         value: production
-#     ingressDomains:
-#       - helloworld-dev2.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
-#     promotion:
-#       to: prod-2
-#       mergeTo: master 
-
-#   ############
-
-
-#   prod-1:
-    
-#     cluster: tfcom-cluster
-#     buildEnv:
-#       - name: NODE_ENV_ARG
-#         value: production-1
-#     ingressDomains:
-#       - helloworld-dev1.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
-#   prod-2:
-    
-#     cluster: tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
-#     env:
-#       - name: NODE_ENV_ARG
-#         value: production-2
-#     ingressDomains:
-#       - helloworld-dev1.tfcom-cluster-na-techopsdev.clouddev.thermofisher.net
