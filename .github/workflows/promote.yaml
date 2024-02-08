@@ -17,7 +17,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Read Pipeline YAML
+        id: read_yaml
+        run: |
+          pipelineYaml=$(cat pipeline.yaml)
+          pipelineYaml="${pipelineYaml//'%'/'%25'}"
+          pipelineYaml="${pipelineYaml//$'\n'/'%0A'}"
+          pipelineYaml="${pipelineYaml//$'\r'/'%0D'}"
+          # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_ENV
+          echo "::set-output name=pipelineYaml::$pipelineYaml"
+          # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_OUTPUT 
+
+
+  Build:
+    # if: ${{ github.job == build }}
+    needs: main
+    runs-on: ubuntu-latest
+    outputs: 
+      image: ${{ steps.build-image.outputs.IMAGE }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Extract branch name
+        env:
+          PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         shell: bash
         run: |
           keys=$(echo "$PIPELINE" | yq eval '.environments | keys_unsorted | .[0]' -)
