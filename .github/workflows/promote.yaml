@@ -96,11 +96,19 @@ jobs:
       
             # Store or use the values as needed
             echo "For environment $env - mergeTo: $mergeTo, to: $to"
+            # Extract 'to' and 'mergeTo' values and process them as needed
             IFS=',' read -ra to_array <<< "$to"
-            for target_env in "${to_array[@]}"; do
-              echo "Target environment: $target_env"
+            IFS=',' read -ra mergeTo_array <<< "$mergeTo"
+            for i in "${!to_array[@]}"; do
+                target_env="${to_array[i]}"
+                target_to="${mergeTo_array[i]}"
 
-              target_to=$(echo "$PIPELINE" | yq eval ".environments.$target_env.promotion.to" -)
-              echo "To value under $target_env: $target_to"
+                # Extract 'to' and 'mergeTo' values for the target environment
+                target_to_value=$(echo "$PIPELINE" | yq eval ".environments.$target_env.promotion.to" -)
+                target_mergeTo_value=$(echo "$PIPELINE" | yq eval ".environments.$target_env.promotion.mergeTo" -)
+        
+                echo "Target environment: $target_env"
+                echo "To value under $target_env: $target_to_value"
+                echo "MergeTo value under $target_env: $target_mergeTo_value"
             done
           done
