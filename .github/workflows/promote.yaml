@@ -20,6 +20,6 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: |
-          keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[0]')
+          keys=$(echo "$PIPELINE" | yq eval '.environments | keys_unsorted | .[0]' -)
           echo "keys: $keys"
         id: current_branch
