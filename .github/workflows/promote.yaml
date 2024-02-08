@@ -96,4 +96,8 @@ jobs:
       
             # Store or use the values as needed
             echo "For environment $env - mergeTo: $mergeTo, to: $to"
+            IFS=',' read -ra to_array <<< "$to"
+            for target_env in "${to_array[@]}"; do
+              echo "Target environment: $target_env"
+            done
           done
