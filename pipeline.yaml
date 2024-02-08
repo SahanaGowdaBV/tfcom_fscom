@@ -34,7 +34,7 @@ deployment:
 
 environments:
   qa4:
-    branch: release/.*
+    branch: integration/.*
     cluster: fscom-cluster-eu-dev1.clouddev.eu.fishersci.net
     env:
       - name: NODE_ENV_ARG
