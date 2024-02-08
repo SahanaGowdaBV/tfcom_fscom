@@ -45,6 +45,6 @@ jobs:
           PIPELINE: ${{ needs.main.outputs.pipelineYaml }}
         shell: bash
         run: |
-          keys=$(echo "$PIPELINE" | yq eval '.environments | keys' -)
+          keys=$(echo "$PIPELINE" | yq eval '.environments | keys[0]' -)
           echo "keys: $keys"
         id: current_branch
