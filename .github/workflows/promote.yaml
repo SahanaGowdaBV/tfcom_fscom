@@ -95,7 +95,7 @@ jobs:
             to=$(echo "$PIPELINE" | yq eval ".environments.$env.promotion.to" -)
       
             # Store or use the values as needed
-            echo "For environment $env - mergeTo: $mergeTo, to: $to"
+            echo "For environment - mergeTo: $mergeTo, to: $to"
             # Extract 'to' and 'mergeTo' values and process them as needed
             IFS=',' read -ra to_array <<< "$to"
             IFS=',' read -ra mergeTo_array <<< "$mergeTo"
