@@ -102,7 +102,7 @@ jobs:
           #     env_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.mergeTo" -)
           #     current_env="${env_1}"
           #   done
-          # done
+          done
    
           # # Remove leading whitespace
           # to=$(echo "$to" | sed 's/^[[:space:]]*//')
