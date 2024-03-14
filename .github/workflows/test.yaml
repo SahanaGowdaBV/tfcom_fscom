@@ -98,7 +98,7 @@ jobs:
             branch_name=$(echo "$PIPELINE" | yq eval ".environments.$env.branch" -)
             echo "branch_name=$branch_name" >> GITHUB_OUTPUT
             echo "branch_name=$branch_name" >> GITHUB_ENV
-            echo "::set-output name=BRANCH_NAME::$branch_name"
+            echo "BRANCH_NAME=$branch_name" >> "$GITHUB_ENV"
             # Set the initial environment
             current_env="$env"
           
@@ -106,7 +106,7 @@ jobs:
             while [ "$current_env" != "null" ]; do
               # Extract the value of 'to' field
               to_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.to" -)
-              
+          
               # Check if the value of 'to' field contains commas
               if [[ "$to_1" == *","* ]]; then
                 # Split the value of 'to' field by comma into an array
@@ -121,7 +121,7 @@ jobs:
               fi
           
               # Move to the next environment
-              env_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.to" -)
+              env_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.mergeTo" -)
               current_env="${env_1}"
           
             done
@@ -133,7 +133,8 @@ jobs:
           # Output the result
           echo "TO=$to" >> GITHUB_OUTPUT
           echo "TO=$to" >> GITHUB_ENV
-          echo "::set-output name=TO::$to"
+          echo "TO=$to" >> "$GITHUB_ENV"
+
 
 
 
