@@ -35,30 +35,15 @@ jobs:
           pipelineYaml="${pipelineYaml//'%'/'%25'}"
           pipelineYaml="${pipelineYaml//$'\n'/'%0A'}"
           pipelineYaml="${pipelineYaml//$'\r'/'%0D'}"
-          # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_ENV
           echo "::set-output name=pipelineYaml::$pipelineYaml"
-          # echo "pipelineYaml=$pipelineYaml" | tee -a $GITHUB_OUTPUT 
   
       - name: env-list
         shell: bash
         id: env-list
         env:
           PIPELINE: ${{ steps.read_yaml.outputs.pipelineYaml }}
-          IMAGE: ${{ steps.build-image.outputs.image }}
-          REGI_NAME: techops-docker-prod.ha-us.dso.thermofisher.net
-          ENV: ${{ steps.promote.outputs.ENV_LIST }}
           CURRENT_BRANCH: ${{ steps.current_branch.outputs.branch }}
-          # PIPELINE_TYPE: ${{ needs.main.outputs.pipelinetype }}
         run: |
-          startingenv=$(echo "$PIPELINE" | yq eval '.environments | keys | .[0]' -)
-          # echo "startingenv=$startingenv" >> GITHUB_OUTPUT
-          echo "startingenv=$startingenv" >> GITHUB_ENV
-          echo "startingenv: $startingenv"
-          # keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[0]' -)
-          # mergeTo=$(echo "$PIPELINE" | yq eval ".environments[\"$keys\"].promotion.mergeTo" -)
-          # echo "mergeTo: $mergeTo"
-          echo "current_branch: $CURRENT_BRANCH" >> GITHUB_ENV
-          echo "Validating the branch for environments:"
           # Set a flag to track if any match is found
           found_match=false
           
@@ -66,8 +51,6 @@ jobs:
           keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
           for key in $keys; do
             branch=$(echo "$PIPELINE" | yq eval ".environments.$key.branch" -)
-            echo "branch=$branch" >> GITHUB_OUTPUT
-            echo "branch=$branch" >> GITHUB_ENV
             echo "Environment: $key, Branch in YAML: $branch, Current Branch: $CURRENT_BRANCH"
             
             # Check if the current branch matches the environment branch
@@ -84,37 +67,26 @@ jobs:
             exit 1  
           fi   
          
-          # mergeTo=$(echo "$PIPELINE" | yq eval ".environments[\"$matched_envs\"].promotion.mergeTo" -)
-          # echo "mergeTo=$mergeTo" >> GITHUB_OUTPUT
-          # echo "mergeTo=$mergeTo" >> GITHUB_ENV
-          # echo "::set-output name=mergeTo::$mergeTo"
-          # echo "mergeTo: $mergeTo"
-  
           to=''
-          mergeTo=''
   
           # Iterate over matched environments
           for env in "${matched_envs[@]}"; do
-            branch_name=$(echo "$PIPELINE" | yq eval ".environments.$env.branch" -)
-            echo "branch_name=$branch_name" >> GITHUB_OUTPUT
-            echo "branch_name=$branch_name" >> GITHUB_ENV
-            echo "::set-output name=BRANCH_NAME::$branch_name"
-            # Set the initial environment
-            current_env="$env"
+            # Extract the value of 'to' field
+            to_1=$(echo "$PIPELINE" | yq eval ".environments.$env.promotion.to" -)
+            echo "to_1=$to_1"
   
-            # Extract and append the "to" values for the specified environment and its promotions
-            while [ "$current_env" != "null" ]; do
-              # Extract the value of 'to' field
-              to_1=$(echo "$PIPELINE" | yq read - "$PIPELINE" | yq eval ".environments.$current_env.promotion.to" -)
-  
-              # Append the values to 'to' variable
+            # Check if the value of 'to' field contains commas
+            if [[ "$to_1" == *","* ]]; then
+              # Split the value of 'to' field by comma into an array
+              IFS=',' read -r -a to_array <<< "$to_1"
+              # Append each environment in to_array to the 'to' variable
+              for to_env in "${to_array[@]}"; do
+                to="${to} ${to_env}"
+              done
+            else
+              # Append the single environment to the 'to' variable
               to="${to} ${to_1}"
-  
-              # Move to the next environment
-              env_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.to" -)
-              current_env="${env_1}"
-  
-            done
+            fi
           done
   
           # Remove leading whitespace
@@ -124,6 +96,7 @@ jobs:
           echo "TO=$to" >> GITHUB_OUTPUT
           echo "TO=$to" >> GITHUB_ENV
           echo "::set-output name=TO::$to"
+
 
 
 
