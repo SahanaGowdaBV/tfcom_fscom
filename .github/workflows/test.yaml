@@ -16,6 +16,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Extract branch name
+        shell: bash
+        run: |
+          branch_name="${GITHUB_REF#refs/heads/}"
+          echo "BRANCH=$branch_name" | tee -a $GITHUB_ENV
+          echo "BRANCH=$branch_name" >> $GITHUB_ENV
+          echo "BRANCH=$branch_name" | tee -a $GITHUB_OUTPUT
+          echo "branch: $branch_name"
+        id: current_branch
         
       - name: Read Pipeline YAML
         shell: bash      
