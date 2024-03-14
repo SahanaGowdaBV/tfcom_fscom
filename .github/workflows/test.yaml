@@ -83,33 +83,34 @@ jobs:
               # Extract the value of 'to' field
               to_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.to" -)
               echo "to_1=$to_1"
-              
-              # Check if the value of 'to' field contains commas
-              if [[ "$to_1" == *","* ]]; then
-                # Split the value of 'to' field by comma into an array
-                IFS=',' read -r -a to_array <<< "$to_1"
-                # Append each environment in to_array to the 'to' variable
-                for to_env in "${to_array[@]}"; do
-                  to="${to} ${to_env}"
-                done
-              else
-                # Append the single environment to the 'to' variable
-                to="${to} ${to_1}"
-              fi
-          
-              # Move to the next environment
-              env_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.mergeTo" -)
-              current_env="${env_1}"
             done
-          done
-   
-          # Remove leading whitespace
-          to=$(echo "$to" | sed 's/^[[:space:]]*//')
+              
+          #     # Check if the value of 'to' field contains commas
+          #     if [[ "$to_1" == *","* ]]; then
+          #       # Split the value of 'to' field by comma into an array
+          #       IFS=',' read -r -a to_array <<< "$to_1"
+          #       # Append each environment in to_array to the 'to' variable
+          #       for to_env in "${to_array[@]}"; do
+          #         to="${to} ${to_env}"
+          #       done
+          #     else
+          #       # Append the single environment to the 'to' variable
+          #       to="${to} ${to_1}"
+          #     fi
           
-          # Output the result
-          echo "TO=$to" >> GITHUB_OUTPUT
-          echo "TO=$to" >> GITHUB_ENV
-          echo "::set-output name=TO::$to"
+          #     # Move to the next environment
+          #     env_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.mergeTo" -)
+          #     current_env="${env_1}"
+          #   done
+          # done
+   
+          # # Remove leading whitespace
+          # to=$(echo "$to" | sed 's/^[[:space:]]*//')
+          
+          # # Output the result
+          # echo "TO=$to" >> GITHUB_OUTPUT
+          # echo "TO=$to" >> GITHUB_ENV
+          # echo "::set-output name=TO::$to"
 
 
 
