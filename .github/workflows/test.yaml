@@ -106,6 +106,8 @@ jobs:
             while [ "$current_env" != "null" ]; do
               # Extract the value of 'to' field
               to_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.to" -)
+              echo "to_1=$to_1" >> GITHUB_OUTPUT
+              echo "to_1=$to_1" >> GITHUB_ENV
           
               # Check if the value of 'to' field contains commas
               if [[ "$to_1" == *","* ]]; then
@@ -134,6 +136,7 @@ jobs:
           echo "TO=$to" >> GITHUB_OUTPUT
           echo "TO=$to" >> GITHUB_ENV
           echo "TO=$to" >> "$GITHUB_ENV"
+
 
 
 
