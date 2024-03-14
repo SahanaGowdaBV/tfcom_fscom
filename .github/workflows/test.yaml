@@ -68,13 +68,13 @@ jobs:
           fi   
          
           to=''
-  
+          
           # Iterate over matched environments
           for env in "${matched_envs[@]}"; do
             # Extract the value of 'to' field
             to_1=$(echo "$PIPELINE" | yq eval ".environments.$env.promotion.to" -)
             echo "to_1=$to_1"
-  
+          
             # Check if the value of 'to' field contains commas
             if [[ "$to_1" == *","* ]]; then
               # Split the value of 'to' field by comma into an array
@@ -88,16 +88,15 @@ jobs:
               to="${to} ${to_1}"
             fi
           done
-  
+          
           # Remove leading whitespace
           to=$(echo "$to" | sed 's/^[[:space:]]*//')
-  
+          
           # Output the result
           echo "TO=$to" >> GITHUB_OUTPUT
           echo "TO=$to" >> GITHUB_ENV
           echo "::set-output name=TO::$to"
 
-# 
 
 
 
