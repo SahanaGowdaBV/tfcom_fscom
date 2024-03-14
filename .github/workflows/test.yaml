@@ -57,7 +57,7 @@ jobs:
           # keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[0]' -)
           # mergeTo=$(echo "$PIPELINE" | yq eval ".environments[\"$keys\"].promotion.mergeTo" -)
           # echo "mergeTo: $mergeTo"
-          echo "current_branch: $current_branch" >> GITHUB_ENV
+          echo "current_branch: $CURRENT_BRANCH" >> GITHUB_ENV
           echo "Validating the branch for environments:"
           # Set a flag to track if any match is found
           found_match=false
@@ -68,10 +68,10 @@ jobs:
             branch=$(echo "$PIPELINE" | yq eval ".environments.$key.branch" -)
             echo "branch=$branch" >> GITHUB_OUTPUT
             echo "branch=$branch" >> GITHUB_ENV
-            echo "Environment: $key, Branch in YAML: $branch, Current Branch: $current_branch"
+            echo "Environment: $key, Branch in YAML: $branch, Current Branch: $CURRENT_BRANCH"
             
             # Check if the current branch matches the environment branch
-            if [ "${branch}" != "null" ] && [[ "${current_branch}" == ${branch%%/*}* ]]; then
+            if [ "${branch}" != "null" ] && [[ "${CURRENT_BRANCH}" == ${branch%%/*}* ]]; then
               echo "Current branch matches for environment: $key"
               found_match=true
               matched_envs+=($key)
