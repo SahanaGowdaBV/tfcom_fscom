@@ -47,7 +47,7 @@ jobs:
           IMAGE: ${{ steps.build-image.outputs.image }}
           REGI_NAME: techops-docker-prod.ha-us.dso.thermofisher.net
           ENV: ${{ steps.promote.outputs.ENV_LIST }}
-          # CURRENT_BRANCH: ${{ needs.main.outputs.branch }}
+          CURRENT_BRANCH: ${{ steps.current_branch.outputs.branch }}
           # PIPELINE_TYPE: ${{ needs.main.outputs.pipelinetype }}
         run: |
           startingenv=$(echo "$PIPELINE" | yq eval '.environments | keys | .[0]' -)
