@@ -12,7 +12,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: [self-hosted, dpe-devops-runner-dind-custom]
+    runs-on: ubuntu-latest
     outputs:
         clustername: ${{ steps.extract.outputs.clustername }}
         namespace: ${{ steps.extract.outputs.namespace }}
