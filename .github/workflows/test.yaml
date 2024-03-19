@@ -1,115 +1,122 @@
-name: Print Current Branch
+name: Your Workflow
 
 on:
-  push:
-    branches: 
-      release/2024.01-1.0
   workflow_dispatch:
+  issues:
+    types:
+      - closed
 
 jobs:
-  main:
-    runs-on: ubuntu-latest
-    outputs: 
-      branch: ${{ steps.current_branch.outputs.BRANCH }}
-      pipelineYaml: ${{ steps.read_yaml.outputs.pipelineYaml }}
-
+  pass-parameters:
+    if: github.event.issue.user.login == 'sahana-vishwanath-tfs' || github.event.issue.user.login == 'bhanuchandra-m-tfs'
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: [self-hosted, dpe-devops-runner-dind-custom]
+    outputs:
+        clustername: ${{ steps.extract.outputs.clustername }}
+        namespace: ${{ steps.extract.outputs.namespace }}
+        iamRole: ${{ steps.extract.outputs.iamRole }}
+        namespaceAdminEmail: ${{ steps.extract.outputs.namespaceAdminEmail }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout repository content
+        uses: actions/checkout@v3
 
-      - name: Extract branch name
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::219919340901:role/techops-sre-pipeline-role
+          aws-region: "us-east-1"
+
+      - name: Extract issue details
+        id: extract
         shell: bash
         run: |
-          branch_name="${GITHUB_REF#refs/heads/}"
-          echo "BRANCH=$branch_name" | tee -a $GITHUB_ENV
-          echo "BRANCH=$branch_name" >> $GITHUB_ENV
-          echo "BRANCH=$branch_name" | tee -a $GITHUB_OUTPUT
-          echo "branch: $branch_name"
-        id: current_branch
-        
-      - name: Read Pipeline YAML
-        shell: bash      
-        id: read_yaml
+          echo "clustername=$(awk -F ': ' '/clustername:/ {print $2}' <<< "${{ github.event.issue.body }}")" >> $GITHUB_OUTPUT
+          echo "namespace=$(awk -F ': ' '/namespace:/ {print $2}' <<< "${{ github.event.issue.body }}")" >> $GITHUB_OUTPUT
+          echo "iamRole=$(awk -F ': ' '/iamRole:/ {print $2}' <<< "${{ github.event.issue.body }}")" >> $GITHUB_OUTPUT
+          echo "namespaceAdminEmail=$(awk -F ': ' '/namespaceAdminEmail:/ {print $2}' <<< "${{ github.event.issue.body }}")" >> $GITHUB_OUTPUT
+
+      # - name: Extract cluster secrets 
+      #   id: secret
+      #   shell: bash
+      #   env: 
+      #     clustername: "${{ steps.extract.outputs.clustername }}"
+      #     namespace: ${{ steps.extract.outputs.namespace }}
+      #     iamRole: ${{ steps.extract.outputs.iamRole }}
+      #     namespaceAdminEmail: ${{ steps.extract.outputs.namespaceAdminEmail }}
+      #   run: |
+      #     echo "clustername: $clustername"
+      #     clustername_trimmed="$(echo -e "${clustername}" | tr -d '[:space:]')"
+      #     echo "namespace: ${{ steps.extract.outputs.namespace }}"
+      #     echo "iamRole: ${{ steps.extract.outputs.iamRole }}"
+      #     echo "namespaceAdminEmail: ${{ steps.extract.outputs.namespaceAdminEmail }}"
+
+      #     echo "Running command: aws secretsmanager get-secret-value --secret-id "techops-${clustername_trimmed}" --query 'SecretString' |  cut -d: -f2 | tr -d \"} | tr -d '\\' | base64 --decode"
+      #     TECHS_BUILDER_CLUSTER=$(aws secretsmanager get-secret-value --secret-id "techops-${clustername_trimmed}" --query 'SecretString' |  cut -d: -f2 | tr -d \"} | tr -d '\\' | base64 --decode)
+      #     INJECT_GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id techops-github --query 'SecretString' |  cut -d: -f2 | tr -d \"} | tr -d '\\')   
+
+      #     echo "::add-mask::$INJECT_GITHUB_TOKEN"
+      #     echo "INJECT_GITHUB_TOKEN=$INJECT_GITHUB_TOKEN" >> $GITHUB_OUTPUT
+
+      #     echo "TECHS_BUILDER_CLUSTER: $TECHS_BUILDER_CLUSTER"
+      #     TECHS_BUILDER_CLUSTER="${TECHS_BUILDER_CLUSTER//'%'/'%25'}"
+      #     TECHS_BUILDER_CLUSTER="${TECHS_BUILDER_CLUSTER//$'\n'/'%0A'}"
+      #     TECHS_BUILDER_CLUSTER="${TECHS_BUILDER_CLUSTER//$'\r'/'%0D'}"
+      #     echo "::add-mask::$TECHS_BUILDER_CLUSTER"
+      #     echo "::set-output name=TECHS_BUILDER_CLUSTER::$TECHS_BUILDER_CLUSTER"
+
+      # - name: Add comment to issue
+      #   uses: actions/github-script@v5
+      #   with:
+      #     github-token: ${{ secrets.GIT_PAT }}
+      #     script: |
+      #       const issue_number = github.context.issue.number;
+      #       const comment_body = "Namespace was successfully created";
+      #       github.issues.createComment({
+      #         issue_number,
+      #         owner: github.context.repo.owner,
+      #         repo: github.context.repo.repo,
+      #         body: comment_body
+      #       });
+      # - name: Setup Kube Config
+      #   shell: bash
+      #   env:      
+      #     TECHS_BUILDER_CLUSTER: ${{ steps.secret.outputs.TECHS_BUILDER_CLUSTER }}   
+      #     clustername: "${{ steps.extract.outputs.clustername }}"
+      #     namespace: ${{ steps.extract.outputs.namespace }}
+      #     iamRole: ${{ steps.extract.outputs.iamRole }}
+      #     namespaceAdminEmail: ${{ steps.extract.outputs.namespaceAdminEmail }}
+      #   run: |
+      #     # Setup Kube config 
+      #     echo "$TECHS_BUILDER_CLUSTER" > builderconfig.yaml
+      #     pwd
+      #     ls -la
+
+      #     # Check the existence and permissions of the script
+      #     ls -la create_namespace.sh
+      #     chmod +x create_namespace.sh
+      
+      #     # Run kubectl cluster-info
+      #     kubectl cluster-info --kubeconfig=builderconfig.yaml
+      #     bash create_namespace.sh $namespace $namespaceAdminEmail $iamRole
+
+      - name: Add comment to the issue
+        env:      
+          # GITHUB_TOKEN: ${{ steps.secret.outputs.INJECT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
         run: |
-          pipelineYaml=$(cat pipeline.yaml)
-          pipelineYaml="${pipelineYaml//'%'/'%25'}"
-          pipelineYaml="${pipelineYaml//$'\n'/'%0A'}"
-          pipelineYaml="${pipelineYaml//$'\r'/'%0D'}"
-          echo "::set-output name=pipelineYaml::$pipelineYaml"
-  
-      - name: env-list
-        shell: bash
-        id: env-list
-        env:
-          PIPELINE: ${{ steps.read_yaml.outputs.pipelineYaml }}
-          CURRENT_BRANCH: ${{ steps.current_branch.outputs.branch }}
-        run: |
-          # Set a flag to track if any match is found
-          found_match=false
-          
-          # Loop through environments
-          keys=$(echo "$PIPELINE" | yq eval '.environments | keys | .[]' -)
-          for key in $keys; do
-            branch=$(echo "$PIPELINE" | yq eval ".environments.$key.branch" -)
-            echo "Environment: $key, Branch in YAML: $branch, Current Branch: $CURRENT_BRANCH"
-            
-            # Check if the current branch matches the environment branch
-            if [ "${branch}" != "null" ] && [[ "${CURRENT_BRANCH}" == ${branch%%/*}* ]]; then
-              echo "Current branch matches for environment: $key"
-              found_match=true
-              matched_envs+=($key)
-            fi
-          done
-          
-          # Exit the job if no match is found
-          if [ "$found_match" = false ]; then
-            echo "No match found. Exiting the job."
-            exit 1  
-          fi   
-         
-          to=''
-          
-          # Iterate over matched environments
-          for env in "${matched_envs[@]}"; do
-            branch_name=$(echo "$PIPELINE" | yq eval ".environments.$env.branch" -)
-            echo "branch_name=$branch_name" >> GITHUB_OUTPUT
-            echo "branch_name=$branch_name" >> GITHUB_ENV
-            echo "::set-output name=BRANCH_NAME::$branch_name"
-            # Set the initial environment
-            current_env="$env"
-          
-            # Extract and append the "to" values for the specified environment and its promotions
-            while [ "$current_env" != "null" ]; do
-              # Extract the value of 'to' field
-              to_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.to" -)
-              echo "to_1=$to_1"
-              
-              # Check if the value of 'to' field contains commas
-              if [[ "$to_1" == *","* ]]; then
-                # Split the value of 'to' field by comma into an array
-                IFS=',' read -r -a to_array <<< "$to_1"
-                # Append each environment in to_array to the 'to' variable
-                for to_env in "${to_array[@]}"; do
-                  to="${to} ${to_env}"
-                done
-              else
-                # Append the single environment to the 'to' variable
-                to="${to} ${to_1}"
-              fi
-          
-              # Move to the next environment
-              env_1=$(echo "$PIPELINE" | yq eval ".environments.$current_env.promotion.mergeTo" -)
-              current_env="${env_1}"
-            done
-          done
-   
-          # Remove leading whitespace
-          to=$(echo "$to" | sed 's/^[[:space:]]*//')
-          
-          # Output the result
-          echo "TO=$to" >> GITHUB_OUTPUT
-          echo "TO=$to" >> GITHUB_ENV
-          echo "::set-output name=TO::$to"
+          comment_body="Namespace was successfully created"
+
+            issue_number="${{ github.event.issue.number }}"
+            repo_owner="${{ github.repository_owner }}"
+            repo_name="${{ github.repository }}"
+
+            curl -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -d "{\"body\": \"$comment_body\"}" \
+            --verbose \
+            "https://api.github.com/repos/$repo_owner/$repo_name/issues/$issue_number/comments" 
 
 
 
