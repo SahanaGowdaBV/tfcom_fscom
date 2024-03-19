@@ -22,8 +22,8 @@ jobs:
       - name: Checkout repository content
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::219919340901:role/techops-sre-pipeline-role
           aws-region: "us-east-1"
