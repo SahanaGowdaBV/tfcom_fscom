@@ -119,6 +119,11 @@ jobs:
             repo_owner="${{ github.repository_owner }}"
             repo_name="${{ github.repository }}"
 
+            echo "Issue Number: $issue_number"
+            echo "Repo Owner: $repo_owner"
+            echo "Repo Name: $repo_name"
+            echo "Constructed URL: https://api.github.com/repos/$repo_owner/$repo_name/issues/$issue_number/comments"
+
             curl -X POST \
             -H "Authorization: token $GITHUB_TOKEN" \
             -d "{\"body\": \"$comment_body\"}" \
