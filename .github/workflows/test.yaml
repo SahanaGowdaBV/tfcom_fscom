@@ -8,7 +8,7 @@ on:
 
 jobs:
   pass-parameters:
-    if: github.event.issue.user.login == 'sahana-vishwanath-tfs' || github.event.issue.user.login == 'bhanuchandra-m-tfs'
+    # if: github.event.issue.user.login == 'sahana-vishwanath-tfs' || github.event.issue.user.login == 'bhanuchandra-m-tfs'
     permissions:
       id-token: write
       contents: read
