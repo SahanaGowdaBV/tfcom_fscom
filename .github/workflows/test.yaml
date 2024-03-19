@@ -101,6 +101,13 @@ jobs:
       #     kubectl cluster-info --kubeconfig=builderconfig.yaml
       #     bash create_namespace.sh $namespace $namespaceAdminEmail $iamRole
 
+      - name: Debug Output
+        run: |
+          echo "Issue Number: $issue_number"
+          echo "Repo Owner: $repo_owner"
+          echo "Repo Name: $repo_name"
+          echo "Constructed URL: https://api.github.com/repos/$repo_owner/$repo_name/issues/$issue_number/comments"
+
       - name: Add comment to the issue
         env:      
           # GITHUB_TOKEN: ${{ steps.secret.outputs.INJECT_GITHUB_TOKEN }}
